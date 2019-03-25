@@ -24,7 +24,7 @@ function processCommand(receivedMessage) {
     let fullCommand = receivedMessage.content.substr(1);
     let splitCommand = fullCommand.split(" ");
     let primaryCommand = splitCommand[0];
-    if(primaryCommand.toLowerCase() === "nnaa") {
+    if(primaryCommand.toLowerCase() === "n") {
         var dice = Math.floor(Math.random()*101); //produce an integer from 0 to 100 inclusive, and send a different nnaa depending on it
         if(dice < 25) {
             receivedMessage.channel.send("Nnaa.");
