@@ -18,6 +18,7 @@ client.on('message', (receivedMessage) => {
     if(receivedMessage.content.startsWith("-")) {
         processCommand(receivedMessage);
     }
+
 })
 
 function processCommand(receivedMessage) {
@@ -42,8 +43,14 @@ function processCommand(receivedMessage) {
             receivedMessage.channel.send("Bunny cunny.");
         }
     }
-
+    if(primaryCommand.toLowerCase() === "i'll") {
+        receivedMessage.channel.send("Yield to none!");
+    }
+    if(primaryCommand.toLowerCase() === "l") {
+        receivedMessage.channel.send("Lol.");
+    }
     return;
+
 }
 bot_secret_token = "Mzc2MjMzNjc4NTAzOTM2MDEw.D3nuqA.bfWPvFMKA-H6CPf52i7Hv0oUlm0"
 client.login(bot_secret_token)
