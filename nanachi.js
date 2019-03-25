@@ -47,6 +47,7 @@ function processCommand(receivedMessage) {
         receivedMessage.channel.send("Yield to none!");
     }
     if(primaryCommand.toLowerCase() === "l") {
+        receivedMessage.delete(10);
         receivedMessage.channel.send("Lol.");
     }
     return;
