@@ -1,0 +1,23 @@
+{
+  "name": "discord",
+  "version": "1.0.0",
+  "description": "discord js",
+  "main": "idk",
+  "dependencies": {
+    "discord.js": "^11.4.2"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "???"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/komaano/nanachi-bot.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/komaano/nanachi-bot/issues"
+  },
+  "homepage": "https://github.com/komaano/nanachi-bot#readme"
+}
