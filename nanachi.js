@@ -2,6 +2,9 @@
 const Discord = require('discord.js');
 const client = new Discord.Client();
 
+const Kaori = require('kaori');
+const kaori = new Kaori();
+
 client.on('ready', () => {
     //list connected servers
     console.log("Servers:");
@@ -20,6 +23,8 @@ client.on('message', (receivedMessage) => {
     }
 
 })
+
+client.on('error', console.error);
 
 function processCommand(receivedMessage) {
 

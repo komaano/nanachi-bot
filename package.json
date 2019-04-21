@@ -4,7 +4,8 @@
   "description": "discord js",
   "main": "idk",
   "dependencies": {
-    "discord.js": "^11.4.2"
+    "discord.js": "^11.4.2",
+    "node-fetch": "^2.3.0"
   },
   "devDependencies": {},
   "scripts": {
