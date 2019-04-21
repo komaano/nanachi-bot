@@ -14,13 +14,19 @@ client.on('ready', () => {
 })
 
 client.on('message', (receivedMessage) => {
-    if(receivedMessage.author == client.user) { //prevent bot from responding to itself
+    if(receivedMessage.author == client.user || receivedMessage.author.bot) { //prevent bot from responding to itself, or other bots
         return;
+    }
+
+    if(receivedMessage.channel.id == "413868545705902082") {
+        receivedMessage.delete(5);
     }
 
     if(receivedMessage.content.startsWith("-")) {
         processCommand(receivedMessage);
     }
+
+
 
 })
 
