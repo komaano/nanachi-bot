@@ -18,7 +18,7 @@ client.on('message', (receivedMessage) => {
         return;
     }
 
-    if(receivedMessage.channel.id === "413868545705902082" || receivedMessage.content !== "Lol.") {
+    if(receivedMessage.channel.id === "413868545705902082" && receivedMessage.content !== "Lol.") {
         receivedMessage.delete(5);
     }
 
