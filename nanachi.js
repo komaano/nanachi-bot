@@ -167,7 +167,7 @@ function processCommand(receivedMessage) {
         }
     }
 
-    if(primaryCommand.tolowerCase() === "kill") {
+    if(primaryCommand.toLowerCase() === "kill") {
         let victims = receivedMessage.mentions.members;
         let count = 0;
         let guildchannels = receivedMessage.member.guild.channels.values();
