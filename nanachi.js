@@ -135,20 +135,19 @@ function processCommand(receivedMessage) {
                 }
             }
 
-            for(let i of membercollection) { //iterate over membercollection, which is actually a list of iterable objects
-                for(let victim of i) {
-                    victim.setVoiceChannel(diechannel)
-                        .then(() => console.log())
-                        .catch(console.error);
-                    anyonepurged = true;
-                }
-            }
-
             diechannel.clone() //clone and delete the die channel
                 .then(result => { 
                     clonedchannel = result;
                     if(diechannel.parent !== null) { 
                         clonedchannel.setParent(diechannel.parent);
+                    }
+                    for(var i of membercollection) { //iterate over membercollection, which is actually a list of iterable objects
+                        for(var victim of i) {
+                            victim.setVoiceChannel(diechannel)
+                                .then(() => console.log())
+                                .catch(console.error);
+                            anyonepurged = true;
+                        }
                     }
                     diechannel.delete('Die.')
                     .then(deleted => console.log("Purged."))
