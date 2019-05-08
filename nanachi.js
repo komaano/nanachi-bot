@@ -185,7 +185,7 @@ function processCommand(receivedMessage) {
             }
         }
 
-        for(let victim of victims.keys()) {
+        for(let victim of victims.values()) {
             if(victim.voiceChannel == null) {
                 continue;
             }
