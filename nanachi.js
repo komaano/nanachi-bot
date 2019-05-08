@@ -5,6 +5,8 @@ const client = new Discord.Client();
 const Kaori = require('kaori');
 const kaori = new Kaori();
 
+let lastKillCommandDate = 0;
+
 client.on('ready', () => {
     //list connected servers
     console.log("Servers:");
@@ -171,41 +173,56 @@ function processCommand(receivedMessage) {
         let victims = receivedMessage.mentions.members;
         let count = 0;
         let guildchannels = receivedMessage.member.guild.channels.values();
+        const now = new Date();
+        
+        if(now - lastKillCommandDate > 2*60*1000) {
 
-        for(let c of guildchannels) {
-            if(c.type !== "voice") { //skip over text channels
-                continue;
+            if(!receivedMessage.member.hasPermission("MANAGE_CHANNELS") && receivedMessage.member.id !== "142907937084407808") {
+                receivedMessage.channel.send("You are not strong enough to commit murder.");
             }
+
             else {
-               
-               if(c.name.toLowerCase() === "the weather channel") { //found the die channel
-                   diechannel = c;
+
+                lastKillCommandDate = now;
+                for(let c of guildchannels) {
+                    if(c.type !== "voice") { //skip over text channels
+                        continue;
+                    }
+                    else {
+                    
+                    if(c.name.toLowerCase() === "the weather channel") { //found the die channel
+                        diechannel = c;
+                        }
+
+                    }
                 }
 
-            }
-        }
-
-        for(let victim of victims.values()) {
-            if(victim.voiceChannel == null) {
-                continue;
-            }
-            else {
-                victim.setVoiceChannel(diechannel);
-            }
-        }
-
-        diechannel.clone() //clone and delete the die channel
-                .then(result => { 
-                    clonedchannel = result; 
-                    if(diechannel.parent != null) {
-                        clonedchannel.setParent(diechannel.parent);
+                for(let victim of victims.values()) {
+                    if(victim.voiceChannel == null) {
+                        continue;
                     }
-                    diechannel.delete('Die.')
-                    .then(deleted => console.log("Purged."))
-                    .catch(console.error);
-                })
-                .catch(console.error);
+                    else {
+                        victim.setVoiceChannel(diechannel);
+                    }
+                }
 
+                diechannel.clone() //clone and delete the die channel
+                        .then(result => { 
+                            clonedchannel = result; 
+                            if(diechannel.parent != null) {
+                                clonedchannel.setParent(diechannel.parent);
+                            }
+                            diechannel.delete('Die.')
+                            .then(deleted => console.log("Purged."))
+                            .catch(console.error);
+                        })
+                        .catch(console.error);
+            }
+        }
+
+        else {
+            receivedMessage.channel.send("Command on cooldown.")
+        }
 
     }
     return;
