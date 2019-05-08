@@ -136,7 +136,7 @@ function processCommand(receivedMessage) {
             }
 
             for(let i of membercollection) { //iterate over membercollection, which is actually a list of iterable objects
-                for(let victim in i) {
+                for(let victim of i) {
                     victim.setVoiceChannel(diechannel);
                     anyonepurged = true;
                 }
@@ -145,7 +145,7 @@ function processCommand(receivedMessage) {
             diechannel.clone() //clone and delete the die channel
                 .then(result => { 
                     clonedchannel = result;
-                    if(diechannel.parent != null) { 
+                    if(diechannel.parent !== null) { 
                         clonedchannel.setParent(diechannel.parent);
                     }
                     diechannel.delete('Die.')
