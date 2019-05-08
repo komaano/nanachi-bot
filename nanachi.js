@@ -70,7 +70,7 @@ function processCommand(receivedMessage) {
     if(primaryCommand.toLowerCase() === "grind") {
         userchannel = receivedMessage.member.voiceChannel;
 
-        if(userchannel == null || userchannel.name.toLowerCase() !== "die.") {
+        if(userchannel == null || (userchannel.name.toLowerCase() !== "die." && userchannel.name.toLowerCase() !== "the weather channel")) {
             receivedMessage.channel.send('You are not in the correct channel.');
         }
 
@@ -82,7 +82,9 @@ function processCommand(receivedMessage) {
             userchannel.clone()
                 .then(result => { 
                     clonedchannel = result; 
-                    clonedchannel.setParent(userchannel.parent);
+                    if(userchannel.parent != null) {
+                        clonedchannel.setParent(userchannel.parent);
+                    }
                 })
                 .catch(console.error);
 
@@ -91,10 +93,10 @@ function processCommand(receivedMessage) {
                 .catch(console.error);
 
             if(count == 1) {
-                receivedMessage.channel.send(`Grinded ${count} retard.`);
+                receivedMessage.channel.send(`Grinded ${count} idiot.`);
             }
             else {
-                receivedMessage.channel.send(`Grinded ${count} retards.`);
+                receivedMessage.channel.send(`Grinded ${count} idiots.`);
             }
 
         }
@@ -121,7 +123,7 @@ function processCommand(receivedMessage) {
                 }
                 else {
                     
-                    if(c.name === "Die.") { //found the die channel
+                    if(c.name === "Die." || c.name === "the weather channel") { //found the die channel
                         diechannel = c;
                         membercollection.push(c.members.values()); 
                     }
@@ -152,10 +154,10 @@ function processCommand(receivedMessage) {
 
 
             if(anyonepurged) {
-                receivedMessage.channel.send("The land has been purged of all retards.");
+                receivedMessage.channel.send("The land has been purged of all idiots.");
             }
             else {
-                receivedMessage.channel.send("There are currently no retards to purge.");
+                receivedMessage.channel.send("There are currently no idiots to purge.");
             }
         }
     }
@@ -190,7 +192,7 @@ function processCommand(receivedMessage) {
                     }
                     else {
                     
-                    if(c.name.toLowerCase() === "the weather channel") { //found the die channel
+                    if(c.name.toLowerCase() === "the weather channel" || c.name.toLowerCase() === "die") { //found the die channel
                         diechannel = c;
                         }
 
