@@ -123,7 +123,7 @@ function processCommand(receivedMessage) {
                 }
                 else {
                     
-                    if(c.name === "Die." || c.name === "the weather channel") { //found the die channel
+                    if(c.name === "Die." || c.name.toLowerCase() === "the weather channel") { //found the die channel
                         diechannel = c;
                         membercollection.push(c.members.values()); 
                     }
