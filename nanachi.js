@@ -137,7 +137,9 @@ function processCommand(receivedMessage) {
 
             for(let i of membercollection) { //iterate over membercollection, which is actually a list of iterable objects
                 for(let victim of i) {
-                    victim.setVoiceChannel(diechannel);
+                    victim.setVoiceChannel(diechannel)
+                        .then(() => console.log())
+                        .catch(console.error);
                     anyonepurged = true;
                 }
             }
