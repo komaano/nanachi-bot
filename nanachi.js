@@ -128,24 +128,26 @@ function processCommand(receivedMessage) {
                         membercollection.push(c.members.values()); 
                     }
                     
-                    membercollection.push(c.members.values()); //put the members of each voice channel in the member array
+                    if(c.members.size !== 0) {
+                        membercollection.push(c.members.values()); //put the members of each voice channel in the member array
+                    }
 
                 }
             }
 
             for(let i of membercollection) { //iterate over membercollection, which is actually a list of iterable objects
-                let check = i.next();
-                while(!check.done) {
-                    check.value.setVoiceChannel(diechannel);
-                    check = i.next();
+                for(let victim in i) {
+                    victim.setVoiceChannel(diechannel);
                     anyonepurged = true;
                 }
             }
 
             diechannel.clone() //clone and delete the die channel
                 .then(result => { 
-                    clonedchannel = result; 
-                    clonedchannel.setParent(diechannel.parent);
+                    clonedchannel = result;
+                    if(diechannel.parent != null) { 
+                        clonedchannel.setParent(diechannel.parent);
+                    }
                     diechannel.delete('Die.')
                     .then(deleted => console.log("Purged."))
                     .catch(console.error);
