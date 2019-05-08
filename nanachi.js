@@ -14,7 +14,7 @@ client.on('ready', () => {
 })
 
 client.on('message', (receivedMessage) => {
-    if(receivedMessage.author == client.user || receivedMessage.author.bot) { //prevent bot from responding to itself, or other bots
+    if(receivedMessage.author === client.user || receivedMessage.author.bot) { //prevent bot from responding to itself, or other bots
         return;
     }
 
@@ -22,7 +22,7 @@ client.on('message', (receivedMessage) => {
         receivedMessage.delete(5);
     }
 
-    if(receivedMessage.content.startsWith("-")) {
+    else if(receivedMessage.content.startsWith("-")) {
         processCommand(receivedMessage);
     }
 
@@ -65,11 +65,11 @@ function processCommand(receivedMessage) {
         receivedMessage.channel.send("Lol.");
     }
 
-    if(primaryCommand.toLowerCase() == "grind") {
+    if(primaryCommand.toLowerCase() === "grind") {
         userchannel = receivedMessage.member.voiceChannel;
 
-        if(userchannel == null || userchannel.name.toLowerCase() != "die.") {
-            receivedMessage.channel.send('You are not in the "Die." channel.');
+        if(userchannel == null || userchannel.name.toLowerCase() !== "die.") {
+            receivedMessage.channel.send('You are not in the correct channel.');
         }
 
         else {
@@ -98,7 +98,7 @@ function processCommand(receivedMessage) {
         }
     }
 
-    if(primaryCommand.toLowerCase() == "purge") {
+    if(primaryCommand.toLowerCase() === "purge") {
         //check if user has permission to delete channels. if not, don't let them purge everyone
         if(!receivedMessage.member.hasPermission("MANAGE_CHANNELS")) {
             receivedMessage.channel.send("You are too weak to initiate a purge.");
@@ -107,29 +107,29 @@ function processCommand(receivedMessage) {
         else {
             userchannel = receivedMessage.member.voiceChannel;
 
-            let guildchannels = receivedMessage.member.guild.channels.values();
-            let diechannel = null;
-            let membercollection = [];
-            let anyonepurged = false;
+            let guildchannels = receivedMessage.member.guild.channels.values(); //all channels in the current server
+            let diechannel = null; //die channel will go here later
+            let membercollection = []; //list of all members present in a voice channel
+            let anyonepurged = false; //boolean to check if anyone was purged
 
             for(let c of guildchannels) {
 
-                if(c.type != "voice") {
+                if(c.type !== "voice") { //skip over text channels
                      continue;
                 }
                 else {
                     
-                    if(c.name == "Die.") {
+                    if(c.name === "Die.") { //found the die channel
                         diechannel = c;
-                        membercollection.push(c.members.values());
+                        membercollection.push(c.members.values()); 
                     }
                     
-                    membercollection.push(c.members.values());
+                    membercollection.push(c.members.values()); //put the members of each voice channel in the member array
 
                 }
             }
 
-            for(let i of membercollection) {
+            for(let i of membercollection) { //iterate over membercollection, which is actually a list of iterable objects
                 let check = i.next();
                 while(!check.done) {
                     check.value.setVoiceChannel(diechannel);
@@ -138,7 +138,7 @@ function processCommand(receivedMessage) {
                 }
             }
 
-            diechannel.clone()
+            diechannel.clone() //clone and delete the die channel
                 .then(result => { 
                     clonedchannel = result; 
                     clonedchannel.setParent(diechannel.parent);
@@ -158,13 +158,55 @@ function processCommand(receivedMessage) {
         }
     }
 
-    if(primaryCommand.toLowerCase() == "count") {
+    if(primaryCommand.toLowerCase() === "count") {
         if(receivedMessage.member.voiceChannel == null) {
             console.log(0)
         }
         else {
             console.log(receivedMessage.member.voiceChannel.members.size); //clean this up later
         }
+    }
+
+    if(primaryCommand.tolowerCase() === "kill") {
+        let victims = receivedMessage.mentions.members;
+        let count = 0;
+        let guildchannels = receivedMessage.member.guild.channels.values();
+
+        for(let c of guildchannels) {
+            if(c.type !== "voice") { //skip over text channels
+                continue;
+            }
+            else {
+               
+               if(c.name.toLowerCase() === "the weather channel") { //found the die channel
+                   diechannel = c;
+                }
+
+            }
+        }
+
+        for(let victim of victims.keys()) {
+            if(victim.voiceChannel == null) {
+                continue;
+            }
+            else {
+                victim.setVoiceChannel(diechannel);
+            }
+        }
+
+        diechannel.clone() //clone and delete the die channel
+                .then(result => { 
+                    clonedchannel = result; 
+                    if(diechannel.parent != null) {
+                        clonedchannel.setParent(diechannel.parent);
+                    }
+                    diechannel.delete('Die.')
+                    .then(deleted => console.log("Purged."))
+                    .catch(console.error);
+                })
+                .catch(console.error);
+
+
     }
     return;
 
