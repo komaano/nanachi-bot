@@ -102,6 +102,7 @@ function processCommand(receivedMessage) {
         }
     }
 
+    /*
     if(primaryCommand.toLowerCase() === "purge") {
         //check if user has permission to delete channels. if not, don't let them purge everyone
         if(!receivedMessage.member.hasPermission("MANAGE_CHANNELS")) {
@@ -135,6 +136,8 @@ function processCommand(receivedMessage) {
                 }
             }
 
+            console.log(membercollection);
+            
             diechannel.clone() //clone and delete the die channel
                 .then(result => { 
                     clonedchannel = result;
@@ -149,6 +152,7 @@ function processCommand(receivedMessage) {
                             anyonepurged = true;
                         }
                     }
+                    
                     diechannel.delete('Die.')
                     .then(deleted => console.log("Purged."))
                     .catch(console.error);
@@ -164,6 +168,7 @@ function processCommand(receivedMessage) {
             }
         }
     }
+    */
 
     if(primaryCommand.toLowerCase() === "count") {
         if(receivedMessage.member.voiceChannel == null) {
@@ -180,7 +185,7 @@ function processCommand(receivedMessage) {
         let guildchannels = receivedMessage.member.guild.channels.values();
         const now = new Date();
         
-        if(now - lastKillCommandDate > 2*60*1000) {
+        if(now - lastKillCommandDate > 30*1000) {
 
             if(!receivedMessage.member.hasPermission("MANAGE_CHANNELS") && receivedMessage.member.id !== "142907937084407808") {
                 receivedMessage.channel.send("You are not strong enough to commit murder.");
