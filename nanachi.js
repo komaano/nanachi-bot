@@ -204,8 +204,9 @@ function processCommand(receivedMessage) {
                     }
                 }
 
+                moveCloneDelete(victims, diechannel);
 
-                for(let victim of victims) {
+                /*for(let victim of victims) {
                     if(victim.voiceChannel === undefined) {
                         receivedMessage.channel.send(`${victim.displayName} is not in a voice channel.`)
                         continue;
@@ -236,16 +237,52 @@ function processCommand(receivedMessage) {
 
                 })
                 .catch(console.error);
-
+                */
             }
         }
 
         else {
-            receivedMessage.channel.send("Command on cooldown. " +"(" +(30 - 1000*(now - lastKillCommandDate)) +" seconds remaining)")
+            receivedMessage.channel.send("Command on cooldown. " +"(" +(30 - (now - lastKillCommandDate)/1000) +" seconds remaining)")
         }
 
     }
     return;
+
+}
+
+async function moveCloneDelete(victims, diechannel) {
+    for(let victim of victims) {
+        if(victim.voiceChannel === undefined) {
+            receivedMessage.channel.send(`${victim.displayName} is not in a voice channel.`)
+            continue;
+        }
+
+        else {
+            let holdmember = victim.setVoiceChannel(diechannel)
+            .then(() => {
+                console.log(`Moved ${victim.displayName}.`)
+            })
+            .catch(console.error);
+            let holdresult = await holdmember; //wait here
+        }
+
+    }
+
+    diechannel.clone()
+    .then((clone) => { //we don't actually need to do anything with the cloned channel except set its parent
+                    
+        if(diechannel.parent !== undefined) {
+            clone.setParent(diechannel.parent)
+            .then(() => console.log("Set parent of clone."))
+            .catch(console.error);
+        }
+
+        diechannel.delete()
+        .then(() => console.log("Deleted the death channel."))
+        .catch(console.error);
+
+    })
+    .catch(console.error);
 
 }
 
