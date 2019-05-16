@@ -206,7 +206,7 @@ function processCommand(receivedMessage) {
 
 
                 for(let victim of victims) {
-                    if(victim.voiceChannel === null) {
+                    if(victim.voiceChannel === undefined) {
                         receivedMessage.channel.send(`${victim.displayName} is not in a voice channel.`)
                         continue;
                     }
@@ -224,9 +224,11 @@ function processCommand(receivedMessage) {
                 diechannel.clone()
                 .then((clone) => { //we don't actually need to do anything with the cloned channel except set its parent
                     
-                    clone.setParent(diechannel.parent)
-                    .then(() => console.log("Set parent of clone."))
-                    .catch(console.error);
+                    if(diechannel.parent !== undefined) {
+                        clone.setParent(diechannel.parent)
+                        .then(() => console.log("Set parent of clone."))
+                        .catch(console.error);
+                    }
 
                     diechannel.delete()
                     .then(() => console.log("Deleted the death channel."))
