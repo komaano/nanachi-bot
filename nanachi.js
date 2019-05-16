@@ -243,6 +243,5 @@ function getVCCount(voicechannel) {
     return voicechannel.members.size;
 }
 
-function getGuildChannels
 bot_secret_token = "Mzc2MjMzNjc4NTAzOTM2MDEw.D3nuqA.bfWPvFMKA-H6CPf52i7Hv0oUlm0"
 client.login(bot_secret_token)
