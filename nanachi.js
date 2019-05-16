@@ -204,7 +204,7 @@ function processCommand(receivedMessage) {
                     }
                 }
 
-                moveCloneDelete(victims, diechannel);
+                moveCloneDelete(receivedMessage, victims, diechannel);
 
                 /*for(let victim of victims) {
                     if(victim.voiceChannel === undefined) {
@@ -250,7 +250,7 @@ function processCommand(receivedMessage) {
 
 }
 
-async function moveCloneDelete(victims, diechannel) {
+async function moveCloneDelete(receivedMessage, victims, diechannel) {
     for(let victim of victims) {
         if(victim.voiceChannel === undefined) {
             receivedMessage.channel.send(`${victim.displayName} is not in a voice channel.`)
