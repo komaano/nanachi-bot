@@ -110,9 +110,8 @@ function processCommand(receivedMessage) {
         }
 
         else {
-            userchannel = receivedMessage.member.voiceChannel;
 
-            let guildchannels = receivedMessage.member.guild.channels.values(); //all channels in the current server
+            let guildchannels = receivedMessage.guild.channels.values(); //all channels in the current server
             let diechannel = null; //die channel will go here later
             let membercollection = []; //list of all members present in a voice channel
             let anyonepurged = false; //boolean to check if anyone was purged
@@ -124,19 +123,17 @@ function processCommand(receivedMessage) {
                 }
                 else {
                     
-                    if(c.name === "Die." || c.name.toLowerCase() === "the weather channel") { //found the die channel
+                    if(c.name.toLowerCase() === "die." || c.name.toLowerCase() === "the weather channel") { //found the die channel
                         diechannel = c;
-                        membercollection.push(c.members.values()); 
+                        membercollection.push(Array.from(c.members.values())); 
                     }
                     
-                    if(c.members.size !== 0) {
-                        membercollection.push(c.members.values()); //put the members of each voice channel in the member array
+                    else if(c.members.size !== 0) {
+                        membercollection.push(Array.from(c.members.values())); //put the members of each voice channel in the member array
                     }
 
                 }
             }
-
-            console.log(membercollection);
             
             diechannel.clone() //clone and delete the die channel
                 .then(result => { 
@@ -171,7 +168,7 @@ function processCommand(receivedMessage) {
     */
 
     if(primaryCommand.toLowerCase() === "count") {
-        if(receivedMessage.member.voiceChannel == null) {
+        if(receivedMessage.member.voiceChannel === null) {
             console.log(0)
         }
         else {
@@ -180,9 +177,9 @@ function processCommand(receivedMessage) {
     }
 
     if(primaryCommand.toLowerCase() === "kill") {
-        let victims = receivedMessage.mentions.members;
+        let victims = Array.from(receivedMessage.mentions.members.values());
         let count = 0;
-        let guildchannels = receivedMessage.guild.channels.values();
+        let guildchannels = Array.from(receivedMessage.guild.channels.values());
         const now = new Date();
         
         if(now - lastKillCommandDate > 30*1000) {
@@ -207,26 +204,45 @@ function processCommand(receivedMessage) {
                     }
                 }
 
-                for(let victim of victims.values()) {
-                    if(victim.voiceChannel == null) {
-                        continue;
-                    }
-                    else {
-                        victim.setVoiceChannel(diechannel);
-                    }
-                }
+                let count = 0;
+                while(count < victims.length) {
 
-                diechannel.clone() //clone and delete the die channel
-                        .then(result => { 
-                            clonedchannel = result; 
-                            if(diechannel.parent != null) {
-                                clonedchannel.setParent(diechannel.parent);
-                            }
-                            diechannel.delete('Die.')
-                            .then(deleted => console.log("Purged."))
+                    for(let victim of victims) {
+                        if(victim.voiceChannel === null) {
+                            receivedMessage.channel.send(`${victim.displayName} is not in a voice channel.`)
+                            count++;
+                            continue;
+                        }
+
+                        else {
+                            victim.setVoiceChannel(diechannel)
+                            .then(() => {
+                                console.log(`Moved ${victim.displayName}.`)
+                                count++;
+                            })
                             .catch(console.error);
-                        })
-                        .catch(console.error);
+                        }
+
+                    }
+
+                }
+                
+                //after the while loop concludes, we can be certain everyone has moved
+                
+                diechannel.clone()
+                .then((clone) => { //we don't actually need to do anything with the cloned channel except set its parent
+                    
+                    clone.setParent(diechannel.parent)
+                    .then(() => console.log("Set parent of clone."))
+                    .catch(console.error);
+
+                    diechannel.delete()
+                    .then(() => console.log("Deleted the death channel."))
+                    .catch(console.error);
+                    
+                })
+                .catch(console.error);
+
             }
         }
 
