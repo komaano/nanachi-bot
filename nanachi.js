@@ -204,30 +204,22 @@ function processCommand(receivedMessage) {
                     }
                 }
 
-                let count = 0;
-                while(count < victims.length) {
 
-                    for(let victim of victims) {
-                        if(victim.voiceChannel === null) {
-                            receivedMessage.channel.send(`${victim.displayName} is not in a voice channel.`)
-                            count++;
-                            continue;
-                        }
+                for(let victim of victims) {
+                    if(victim.voiceChannel === null) {
+                        receivedMessage.channel.send(`${victim.displayName} is not in a voice channel.`)
+                        continue;
+                    }
 
-                        else {
-                            victim.setVoiceChannel(diechannel)
-                            .then(() => {
-                                console.log(`Moved ${victim.displayName}.`)
-                                count++;
-                            })
-                            .catch(console.error);
-                        }
-
+                    else {
+                        victim.setVoiceChannel(diechannel)
+                        .then(() => {
+                            console.log(`Moved ${victim.displayName}.`)
+                        })
+                        .catch(console.error);
                     }
 
                 }
-                
-                //after the while loop concludes, we can be certain everyone has moved
                 
                 diechannel.clone()
                 .then((clone) => { //we don't actually need to do anything with the cloned channel except set its parent
@@ -239,7 +231,7 @@ function processCommand(receivedMessage) {
                     diechannel.delete()
                     .then(() => console.log("Deleted the death channel."))
                     .catch(console.error);
-                    
+
                 })
                 .catch(console.error);
 
