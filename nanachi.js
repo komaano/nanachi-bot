@@ -182,7 +182,7 @@ function processCommand(receivedMessage) {
     if(primaryCommand.toLowerCase() === "kill") {
         let victims = receivedMessage.mentions.members;
         let count = 0;
-        let guildchannels = receivedMessage.member.guild.channels.values();
+        let guildchannels = receivedMessage.guild.channels.values();
         const now = new Date();
         
         if(now - lastKillCommandDate > 30*1000) {
@@ -200,7 +200,7 @@ function processCommand(receivedMessage) {
                     }
                     else {
                     
-                    if(c.name.toLowerCase() === "the weather channel" || c.name.toLowerCase() === "die") { //found the die channel
+                    if(c.name.toLowerCase() === "the weather channel" || c.name.toLowerCase() === "die.") { //found the die channel
                         diechannel = c;
                         }
 
@@ -231,7 +231,7 @@ function processCommand(receivedMessage) {
         }
 
         else {
-            receivedMessage.channel.send("Command on cooldown.")
+            receivedMessage.channel.send("Command on cooldown. " +"(" +(30 - 1000*(now - lastKillCommandDate)) +" seconds remaining)")
         }
 
     }
@@ -242,5 +242,7 @@ function processCommand(receivedMessage) {
 function getVCCount(voicechannel) {
     return voicechannel.members.size;
 }
+
+function getGuildChannels
 bot_secret_token = "Mzc2MjMzNjc4NTAzOTM2MDEw.D3nuqA.bfWPvFMKA-H6CPf52i7Hv0oUlm0"
 client.login(bot_secret_token)
