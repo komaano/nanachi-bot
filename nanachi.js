@@ -6,6 +6,7 @@ const Kaori = require('kaori');
 const kaori = new Kaori();
 
 let lastKillCommandDate = 0;
+let lastStfuCommanddate = 0;
 
 client.on('ready', () => {
     //list connected servers
@@ -206,38 +207,6 @@ function processCommand(receivedMessage) {
 
                 moveCloneDelete(receivedMessage, victims, diechannel);
 
-                /*for(let victim of victims) {
-                    if(victim.voiceChannel === undefined) {
-                        receivedMessage.channel.send(`${victim.displayName} is not in a voice channel.`)
-                        continue;
-                    }
-
-                    else {
-                        victim.setVoiceChannel(diechannel)
-                        .then(() => {
-                            console.log(`Moved ${victim.displayName}.`)
-                        })
-                        .catch(console.error);
-                    }
-
-                }
-                
-                diechannel.clone()
-                .then((clone) => { //we don't actually need to do anything with the cloned channel except set its parent
-                    
-                    if(diechannel.parent !== undefined) {
-                        clone.setParent(diechannel.parent)
-                        .then(() => console.log("Set parent of clone."))
-                        .catch(console.error);
-                    }
-
-                    diechannel.delete()
-                    .then(() => console.log("Deleted the death channel."))
-                    .catch(console.error);
-
-                })
-                .catch(console.error);
-                */
             }
         }
 
@@ -257,6 +226,41 @@ function processCommand(receivedMessage) {
         receivedMessage.delete()
         .then(() => console.log("Tracks hidden."))
         .catch(console.error);
+    }
+
+    //////////////////////////////////////////////////////////////////////
+
+    if(primaryCommand.toLowerCase() === "stfu") {
+        const now = new Date();
+        let guildchannels = Array.from(receivedMessage.guild.channels.values());
+        let allmuted = [];
+
+        if(now - lastStfuCommanddate > 60*1000) {
+            for(let channel of guildchannels) {
+                if(channel.type !== "voice") {
+                    continue;
+                }
+                else {
+                    let people = Array.from(channel.members.values());
+                    allmuted.concat(people);
+
+                    if(people.length !== 0) { //this executes if the channel is not empty
+                        muteControl(true, people);
+                    }
+
+                    else {
+                        continue;
+                    }
+                }
+            }
+
+            setTimeout(muteControl(false, allmuted), 10000);
+
+        }
+
+        else (
+            receivedMessage.channel.send("Command on cooldown. " +"(" +(60 - (now - lastKillCommandDate)/1000) +" seconds remaining)")
+        )
     }
     return;
 
@@ -298,9 +302,12 @@ async function moveCloneDelete(receivedMessage, victims, diechannel) {
 
 }
 
-function getVCCount(voicechannel) {
-    return voicechannel.members.size;
+async function muteControl(control, people) { //this function mutes a given set of people in voice
+    people.forEach((person) => {
+        person.setMute(control)
+        .then(() => console.log(`${person.displayName} muted/unmuted.`))
+        .catch(console.error);
+    });
 }
-
 bot_secret_token = "Mzc2MjMzNjc4NTAzOTM2MDEw.D3nuqA.bfWPvFMKA-H6CPf52i7Hv0oUlm0"
 client.login(bot_secret_token)
