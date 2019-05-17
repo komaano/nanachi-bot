@@ -246,6 +246,18 @@ function processCommand(receivedMessage) {
         }
 
     }
+
+    if(primaryCommand.toLowerCase() === "ploblem?") {
+        if(receivedMessage.guild.id === `110125954348613632` && receivedMessage.member.voiceChannel !== undefined) {
+            receivedMessage.member.setVoiceChannel(`118106402932785156`)
+            .then(() => console.log("PROBLEM OFFICER?"))
+            .catch(console.error);
+        }
+
+        receivedMessage.delete()
+        .then(() => console.log("Tracks hidden."))
+        .catch(console.error);
+    }
     return;
 
 }
