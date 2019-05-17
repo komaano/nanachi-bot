@@ -254,7 +254,7 @@ function processCommand(receivedMessage) {
                 }
             }
 
-            setTimeout(muteControl(false, allmuted), 10000);
+            setTimeout(() => muteControl(false, allmuted), 10000);
 
         }
 
