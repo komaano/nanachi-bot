@@ -260,7 +260,6 @@ function processCommand(receivedMessage) {
                     }
                     else {
                         let people = Array.from(channel.members.values());
-                        allmuted.concat(people);
     
                         if(people.length !== 0) { //this executes if the channel is not empty
                             muteControl(false, people);
