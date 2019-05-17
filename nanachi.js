@@ -233,7 +233,6 @@ function processCommand(receivedMessage) {
     if(primaryCommand.toLowerCase() === "stfu") {
         const now = new Date();
         let guildchannels = Array.from(receivedMessage.guild.channels.values());
-        let allmuted = [];
 
         if(now - lastStfuCommanddate > 60*1000) {
             for(let channel of guildchannels) {
@@ -254,7 +253,25 @@ function processCommand(receivedMessage) {
                 }
             }
 
-            setTimeout(() => muteControl(false, allmuted), 10000);
+            setTimeout(() => {
+                for(let channel of guildchannels) {
+                    if(channel.type !== "voice") {
+                        continue;
+                    }
+                    else {
+                        let people = Array.from(channel.members.values());
+                        allmuted.concat(people);
+    
+                        if(people.length !== 0) { //this executes if the channel is not empty
+                            muteControl(false, people);
+                        }
+    
+                        else {
+                            continue;
+                        }
+                    }
+                }
+            }, 10000);
 
         }
 
