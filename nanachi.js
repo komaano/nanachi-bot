@@ -112,10 +112,9 @@ function processCommand(receivedMessage) {
 
         else {
 
-            let guildchannels = receivedMessage.guild.channels.values(); //all channels in the current server
+            let guildchannels = Array.from(receivedMessage.guild.channels.values()); //all channels in the current server
             let diechannel = null; //die channel will go here later
             let membercollection = []; //list of all members present in a voice channel
-            let anyonepurged = false; //boolean to check if anyone was purged
 
             for(let c of guildchannels) {
 
