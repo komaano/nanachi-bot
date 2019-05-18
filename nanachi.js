@@ -235,6 +235,7 @@ function processCommand(receivedMessage) {
         let guildchannels = Array.from(receivedMessage.guild.channels.values());
 
         if(now - lastStfuCommanddate > 60*1000) {
+            lastStfuCommanddate = now;
             for(let channel of guildchannels) {
                 if(channel.type !== "voice") {
                     continue;
@@ -276,6 +277,26 @@ function processCommand(receivedMessage) {
         else (
             receivedMessage.channel.send("Command on cooldown. " +"(" +(60 - (now - lastKillCommandDate)/1000) +" seconds remaining)")
         )
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    if(primaryCommand == "bomb") {
+        let hellchannel = receivedMessage.member.voiceChannel;
+        if(hellchannel === undefined) {
+            receivedMessage.channel.send("You are not in a voice channel.");
+        }
+
+        else {
+            hellchannel.join()
+            .then((vconnection) => {
+                const player = vconnection.playFile("/home/pi/Desktop/nanachi/nanachi-bot/bomb.mp3");
+                player.on("end", end => {
+                    hellchannel.leave();
+                })
+            })
+            .catch(console.error);
+        }
     }
     return;
 
