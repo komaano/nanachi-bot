@@ -136,6 +136,8 @@ function processCommand(receivedMessage) {
             }
             
             moveCloneDelete(null, membercollection, diechannel);
+            console.log(membercollection);
+
 
             if(membercollection.length !== 0) {
                 receivedMessage.channel.send("The land has been purged of all idiots.");
