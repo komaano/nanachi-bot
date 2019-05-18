@@ -125,19 +125,17 @@ function processCommand(receivedMessage) {
                     
                     if(c.name.toLowerCase() === "die." || c.name.toLowerCase() === "the weather channel") { //found the die channel
                         diechannel = c;
-                        membercollection.concat(Array.from(c.members.values())); 
+                        membercollection = membercollection.concat(Array.from(c.members.values())); 
                     }
                     
                     else if(c.members.size !== 0) {
-                        membercollection.concat(Array.from(c.members.values())); //put the members of each voice channel in the member array
+                        membercollection = membercollection.concat(Array.from(c.members.values())); //put the members of each voice channel in the member array
                     }
 
                 }
             }
             
             moveCloneDelete(null, membercollection, diechannel);
-            console.log(membercollection);
-
 
             if(membercollection.length !== 0) {
                 receivedMessage.channel.send("The land has been purged of all idiots.");
