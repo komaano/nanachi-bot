@@ -286,7 +286,7 @@ function processCommand(receivedMessage) {
                 })
                 .catch(console.error);
             }
-            else if(splitCommand[1] === "mymom") {
+            else if(splitCommand[1] === "ree") {
                 hellchannel.join()
                 .then((vconnection) => {
                     const player = vconnection.playFile("/home/pi/Desktop/nanachi/nanachi-bot/FUCKING_NORMALFAGS.mp3");
