@@ -103,7 +103,7 @@ function processCommand(receivedMessage) {
         }
     }
 
-    /*
+    
     if(primaryCommand.toLowerCase() === "purge") {
         //check if user has permission to delete channels. if not, don't let them purge everyone
         if(!receivedMessage.member.hasPermission("MANAGE_CHANNELS")) {
@@ -126,39 +126,19 @@ function processCommand(receivedMessage) {
                     
                     if(c.name.toLowerCase() === "die." || c.name.toLowerCase() === "the weather channel") { //found the die channel
                         diechannel = c;
-                        membercollection.push(Array.from(c.members.values())); 
+                        membercollection.concat(Array.from(c.members.values())); 
                     }
                     
                     else if(c.members.size !== 0) {
-                        membercollection.push(Array.from(c.members.values())); //put the members of each voice channel in the member array
+                        membercollection.concat(Array.from(c.members.values())); //put the members of each voice channel in the member array
                     }
 
                 }
             }
             
-            diechannel.clone() //clone and delete the die channel
-                .then(result => { 
-                    clonedchannel = result;
-                    if(diechannel.parent !== null) { 
-                        clonedchannel.setParent(diechannel.parent);
-                    }
-                    for(var i of membercollection) { //iterate over membercollection, which is actually a list of iterable objects
-                        for(var victim of i) {
-                            victim.setVoiceChannel(diechannel)
-                                .then(() => console.log())
-                                .catch(console.error);
-                            anyonepurged = true;
-                        }
-                    }
-                    
-                    diechannel.delete('Die.')
-                    .then(deleted => console.log("Purged."))
-                    .catch(console.error);
-                })
-                .catch(console.error);
+            moveCloneDelete(null, membercollection, diechannel);
 
-
-            if(anyonepurged) {
+            if(membercollection.length !== 0) {
                 receivedMessage.channel.send("The land has been purged of all idiots.");
             }
             else {
@@ -166,7 +146,6 @@ function processCommand(receivedMessage) {
             }
         }
     }
-    */
 
     if(primaryCommand.toLowerCase() === "count") {
         if(receivedMessage.member.voiceChannel === null) {
@@ -317,9 +296,9 @@ function processCommand(receivedMessage) {
 
 }
 
-async function moveCloneDelete(receivedMessage, victims, diechannel) {
+async function moveCloneDelete(receivedMessage, victims, diechannel) { //receivedMessage is what it says, victims is an array of guildmembers, diechannel is the death channel
     for(let victim of victims) {
-        if(victim.voiceChannel === undefined) {
+        if(victim.voiceChannel === undefined && receivedMessage !== null) {
             receivedMessage.channel.send(`${victim.displayName} is not in a voice channel.`)
             continue;
         }
