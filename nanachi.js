@@ -281,21 +281,36 @@ function processCommand(receivedMessage) {
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    if(primaryCommand == "bomb") {
+    if(primaryCommand == "pl") {
         let hellchannel = receivedMessage.member.voiceChannel;
         if(hellchannel === undefined) {
             receivedMessage.channel.send("You are not in a voice channel.");
         }
 
         else {
-            hellchannel.join()
-            .then((vconnection) => {
-                const player = vconnection.playFile("/home/pi/Desktop/nanachi/nanachi-bot/bomb.mp3");
-                player.on("end", end => {
-                    hellchannel.leave();
+            if(splitCommand[1] === "bomb") {
+                hellchannel.join()
+                .then((vconnection) => {
+                    const player = vconnection.playFile("/home/pi/Desktop/nanachi/nanachi-bot/bomb.mp3");
+                    player.on("end", end => {
+                        hellchannel.leave();
+                    })
                 })
-            })
-            .catch(console.error);
+                .catch(console.error);
+            }
+            else if(splitCommand[1] === "mymom") {
+                hellchannel.join()
+                .then((vconnection) => {
+                    const player = vconnection.playFile("/home/pi/Desktop/nanachi/nanachi-bot/my-mom.mp3");
+                    player.on("end", end => {
+                        hellchannel.leave();
+                    })
+                })
+                .catch(console.error);
+            }
+            else {
+                receivedMessage.channel.send("Not a valid command.");
+            }
         }
     }
     return;
