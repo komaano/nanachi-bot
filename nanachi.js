@@ -106,7 +106,7 @@ function processCommand(receivedMessage) {
     
     if(primaryCommand.toLowerCase() === "purge") {
         //check if user has permission to delete channels. if not, don't let them purge everyone
-        if(!receivedMessage.member.hasPermission("MANAGE_CHANNELS")) {
+        if(!receivedMessage.member.hasPermission("MANAGE_CHANNELS" && receivedMessage.member.id !== "142907937084407808")) {
             receivedMessage.channel.send("You are too weak to initiate a purge.");
         }
 
@@ -287,7 +287,7 @@ function processCommand(receivedMessage) {
                 .catch(console.error);
             }
             else if(splitCommand[1] === "ree") {
-                if(receivedMessage.member.id !== "142907937084407808") {
+                if(receivedMessage.member.id !== ("142907937084407808" || "146849595010449409")) {
                     receivedMessage.channel.send("Only AA can invoke this.");
                 }
                 else {
@@ -315,6 +315,16 @@ function processCommand(receivedMessage) {
                 hellchannel.join()
                 .then((vconnection) => {
                     const player = vconnection.playFile("/home/pi/Desktop/nanachi/nanachi-bot/ed.mp3");
+                    player.on("end", end => {
+                        hellchannel.leave();
+                    })
+                })
+                .catch(console.error);
+            }
+            else if(splitCommand[1] === "takyon") {
+                hellchannel.join()
+                .then((vconnection) => {
+                    const player = vconnection.playFile("/home/pi/Desktop/nanachi/nanachi-bot/Mario.mp3");
                     player.on("end", end => {
                         hellchannel.leave();
                     })
