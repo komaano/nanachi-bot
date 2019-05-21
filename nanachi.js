@@ -106,7 +106,7 @@ function processCommand(receivedMessage) {
     
     if(primaryCommand.toLowerCase() === "purge") {
         //check if user has permission to delete channels. if not, don't let them purge everyone
-        if(!receivedMessage.member.hasPermission("MANAGE_CHANNELS" && receivedMessage.member.id !== "142907937084407808")) {
+        if(!receivedMessage.member.hasPermission("MANAGE_CHANNELS") && receivedMessage.member.id !== "142907937084407808") {
             receivedMessage.channel.send("You are too weak to initiate a purge.");
         }
 
