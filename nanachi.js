@@ -13,8 +13,8 @@ client.on('ready', () => {
     console.log("Servers:");
     client.guilds.forEach((guild) => {
         console.log(" - " + guild.name);
-    })
-})
+    });
+});
 
 client.on('message', (receivedMessage) => {
     if(receivedMessage.author === client.user || receivedMessage.author.bot) { //prevent bot from responding to itself, or other bots
@@ -22,7 +22,7 @@ client.on('message', (receivedMessage) => {
     }
 
     if(receivedMessage.channel.id === "413868545705902082" && receivedMessage.content !== "Lol.") {
-        receivedMessage.delete(5);
+        receivedMessage.delete(15);
     }
 
     else if(receivedMessage.content.startsWith("-")) {
@@ -31,7 +31,13 @@ client.on('message', (receivedMessage) => {
 
 
 
-})
+});
+
+client.on('messageUpdate', (oldMessage, newMessage) => {
+    if(oldMessage.channel.id === "413868545705902082") {
+        newMessage.delete();
+    }
+});
 
 client.on('error', console.error);
 
