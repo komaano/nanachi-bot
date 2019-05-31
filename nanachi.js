@@ -21,7 +21,7 @@ client.on('message', (receivedMessage) => {
         return;
     }
 
-    else if(receivedMessage.channel.id === "413868545705902082" && (receivedMessage.content !== "Lol." || receivedMessage.content !== "-l") {
+    else if(receivedMessage.channel.id === "413868545705902082" && (receivedMessage.content !== "Lol." || receivedMessage.content !== "-l")) {
         receivedMessage.delete(15);
     }
 
