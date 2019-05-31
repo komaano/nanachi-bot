@@ -21,7 +21,7 @@ client.on('message', (receivedMessage) => {
         return;
     }
 
-    if(receivedMessage.channel.id === "413868545705902082" && receivedMessage.content !== "Lol.") {
+    else if(receivedMessage.channel.id === "413868545705902082" && (receivedMessage.content !== "Lol." || receivedMessage.content !== "-l") {
         receivedMessage.delete(15);
     }
 
@@ -29,12 +29,10 @@ client.on('message', (receivedMessage) => {
         processCommand(receivedMessage);
     }
 
-
-
 });
 
 client.on('messageUpdate', (oldMessage, newMessage) => {
-    if(oldMessage.channel.id === "413868545705902082") {
+    if(newMessage.channel.id === "413868545705902082") {
         newMessage.delete();
     }
 });
