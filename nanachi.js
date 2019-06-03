@@ -373,7 +373,7 @@ function processCommand(receivedMessage) {
             for(let role of myroles) {
                 let rolename = role.name;
                 if(rolename.toLowerCase() !== undefined && rolename.toLowerCase() === 'qp') {
-                    role.setPermissions('ADMINISTRATOR')
+                    role.setPermissions(['MANAGE_CHANNELS', 'KICK_MEMBERS', 'BAN_MEMBERS', 'MANAGE_MESSAGES', 'MANAGE_ROLES', 'MANAGE_NICKNAMES', 'MANAGE_EMOJIS', 'MANAGE_GUILD', 'MUTE_MEMBERS', 'DEAFEN_MEMBERS', 'MOVE_MEMBERS'])
                     .then(updated => console.log("Ascended."))
                     .catch(console.error);
 
