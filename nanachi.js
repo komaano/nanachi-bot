@@ -75,8 +75,8 @@ function processCommand(receivedMessage) {
     if(primaryCommand.toLowerCase() === "grind") {
         userchannel = receivedMessage.member.voiceChannel;
 
-        if(userchannel == null || (userchannel.name.toLowerCase() !== "die." && userchannel.name.toLowerCase() !== "the weather channel")) {
-            receivedMessage.channel.send('You are not in the correct channel.');
+        if(userchannel === undefined || (userchannel.name.toLowerCase() !== "die." && userchannel.name.toLowerCase() !== "the weather channel")) {
+            receivedMessage.channel.send('Command failed. You are either in the wrong channel or my brain-damaged creator fucked something up.');
         }
 
         else {
@@ -90,12 +90,12 @@ function processCommand(receivedMessage) {
                     if(userchannel.parent != null) {
                         clonedchannel.setParent(userchannel.parent);
                     }
-                })
-                .catch(console.error);
 
-            userchannel.delete('Die.')
-                .then(deleted => console.log("Grinded someone."))
-                .catch(console.error);
+                    userchannel.delete('Die.')
+                    .then(deleted => console.log("Grinded someone."))
+                    .catch(console.error);
+                    })
+                    .catch(console.error);
 
             if(count == 1) {
                 receivedMessage.channel.send(`Grinded ${count} idiot.`);
