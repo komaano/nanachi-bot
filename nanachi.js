@@ -73,25 +73,26 @@ function processCommand(receivedMessage) {
     }
 
     if(primaryCommand.toLowerCase() === "grind") {
-        userchannel = receivedMessage.member.voiceChannel;
+        let guildchannels = Array.from(receivedMessage.guild.channels.values());
+        let diechannel = guildchannels[guildchannels.length-1];
 
-        if(userchannel === undefined || (userchannel.name.toLowerCase() !== "die." && userchannel.name.toLowerCase() !== "the weather channel")) {
+        if(diechannel === undefined || (diechannel.name.toLowerCase() !== "die." && diechannel.name.toLowerCase() !== "the weather channel")) {
             receivedMessage.channel.send('Command failed. You are either in the wrong channel or my brain-damaged creator fucked something up.');
         }
 
         else {
 
-            let count = userchannel.members.size
+            let count = diechannel.members.size
             let clonedchannel = null;
 
-            userchannel.clone()
+            diechannel.clone()
                 .then(result => { 
                     clonedchannel = result; 
-                    if(userchannel.parent != null) {
-                        clonedchannel.setParent(userchannel.parent);
+                    if(diechannel.parent != null) {
+                        clonedchannel.setParent(diechannel.parent);
                     }
 
-                    userchannel.delete('Die.')
+                    diechannel.delete('Die.')
                     .then(deleted => console.log("Grinded someone."))
                     .catch(console.error);
                     })
@@ -117,7 +118,7 @@ function processCommand(receivedMessage) {
         else {
 
             let guildchannels = Array.from(receivedMessage.guild.channels.values()); //all channels in the current server
-            let diechannel = null; //die channel will go here later
+            let diechannel = guildchannels[guildchannels.length-1]; //die channel will go here
             let membercollection = []; //list of all members present in a voice channel
 
             for(let c of guildchannels) {
@@ -127,23 +128,18 @@ function processCommand(receivedMessage) {
                 }
                 else {
                     
-                    if(c.name.toLowerCase() === "die." || c.name.toLowerCase() === "the weather channel") { //found the die channel
-                        diechannel = c;
-                        membercollection = membercollection.concat(Array.from(c.members.values())); 
-                    }
-                    
-                    else if(c.members.size !== 0) {
+                    if(c.members.size !== 0) {
                         membercollection = membercollection.concat(Array.from(c.members.values())); //put the members of each voice channel in the member array
                     }
 
                 }
             }
-            
-            moveCloneDelete(null, membercollection, diechannel);
 
             if(membercollection.length !== 0) {
+                moveCloneDelete(null, membercollection, diechannel);
                 receivedMessage.channel.send("The land has been purged of all idiots.");
             }
+
             else {
                 receivedMessage.channel.send("There are currently no idiots to purge.");
             }
@@ -174,18 +170,7 @@ function processCommand(receivedMessage) {
             else {
 
                 lastKillCommandDate = now;
-                for(let c of guildchannels) {
-                    if(c.type !== "voice") { //skip over text channels
-                        continue;
-                    }
-                    else {
-                    
-                    if(c.name.toLowerCase() === "the weather channel" || c.name.toLowerCase() === "die.") { //found the die channel
-                        diechannel = c;
-                        }
-
-                    }
-                }
+                let diechannel = guildchannels[guildchannels.length-1];
 
                 moveCloneDelete(receivedMessage, victims, diechannel);
 
@@ -391,6 +376,16 @@ function processCommand(receivedMessage) {
 }
 
 async function moveCloneDelete(receivedMessage, victims, diechannel) { //receivedMessage is what it says, victims is an array of guildmembers, diechannel is the death channel
+    
+    let check = false;
+
+    if(diechannel == undefined || diechannel == null) {
+        diechannel = receivedMessage.guild.createChannel("make a proper channel idiot", {type: 'voice'})
+        .then(console.log("Placeholder channel created."))
+        .catch(console.error);
+        check = true;
+    }
+    
     for(let victim of victims) {
         if(victim.voiceChannel === undefined && receivedMessage !== null) {
             receivedMessage.channel.send(`${victim.displayName} is not in a voice channel.`)
@@ -408,21 +403,29 @@ async function moveCloneDelete(receivedMessage, victims, diechannel) { //receive
 
     }
 
-    diechannel.clone()
-    .then((clone) => { //we don't actually need to do anything with the cloned channel except set its parent
-                    
-        if(diechannel.parent !== undefined) {
-            clone.setParent(diechannel.parent)
-            .then(() => console.log("Set parent of clone."))
-            .catch(console.error);
-        }
+    if(!check) {
+        diechannel.clone()
+        .then((clone) => { //we don't actually need to do anything with the cloned channel except set its parent
+                        
+            if(diechannel.parent !== undefined) {
+                clone.setParent(diechannel.parent)
+                .then(() => console.log("Set parent of clone."))
+                .catch(console.error);
+            }
 
+            diechannel.delete()
+            .then(() => console.log("Deleted the death channel."))
+            .catch(console.error);
+
+        })
+        .catch(console.error);
+    }
+
+    else {
         diechannel.delete()
         .then(() => console.log("Deleted the death channel."))
         .catch(console.error);
-
-    })
-    .catch(console.error);
+    }
 
 }
 
