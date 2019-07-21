@@ -112,7 +112,8 @@ function processCommand(receivedMessage) {
         else {
 
             let guildchannels = Array.from(receivedMessage.guild.channels.values()); //all channels in the current server
-            let diechannel = undefined; //die channel will go here
+            guildchannels.filter((channel) => channel.type == "voice");
+            let diechannel = guildchannels[guildchannels.length-1]; //die channel will go here
             let membercollection = []; //list of all members present in a voice channel
 
             for(let c of guildchannels) {
@@ -124,7 +125,6 @@ function processCommand(receivedMessage) {
                     
                     if(c.members.size !== 0) {
                         membercollection = membercollection.concat(Array.from(c.members.values())); //put the members of each voice channel in the member array
-                        diechannel = c;
                     }
 
                 }
