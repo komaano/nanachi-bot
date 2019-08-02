@@ -336,6 +336,16 @@ function processCommand(receivedMessage) {
                 })
                 .catch(console.error);
             }
+            else if(splitCommand[1] === "stinky") {
+                hellchannel.join()
+                .then((vconnection) => {
+                    const player = vconnection.playFile("/home/pi/Desktop/nanachi/nanachi-bot/stinky.mp3");
+                    player.on("end", end => {
+                        hellchannel.leave();
+                    })
+                })
+                .catch(console.error);
+            }
             else {
                 receivedMessage.channel.send("Not a valid command.");
             }
