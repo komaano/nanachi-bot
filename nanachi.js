@@ -22,7 +22,7 @@ client.on('message', (receivedMessage) => {
     }
 
     else if(receivedMessage.member.id === '125355456653688832') {
-        receivedMessage.react(receivedMessage.guild.emojis.get('617123576398479380'))
+        receivedMessage.react('weirdchamp')
         .then(console.log)
         .catch(console.error);
         return;
