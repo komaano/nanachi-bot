@@ -21,12 +21,21 @@ client.on('message', (receivedMessage) => {
         return;
     }
 
+    else if(receivedMessage.member.id === '125355456653688832') {
+        receivedMessage.react(':weirdchamp:')
+        .then(console.log)
+        .catch(console.error);
+        return;
+    }
+
     else if(receivedMessage.channel.id === "413868545705902082" && (receivedMessage.content !== "Lol." && receivedMessage.content !== "-l")) {
         receivedMessage.delete(15);
+        return;
     }
 
     else if(receivedMessage.content.startsWith("-")) {
         processCommand(receivedMessage);
+        return;
     }
 
 });
