@@ -76,7 +76,7 @@ function processCommand(receivedMessage) {
 
     if(primaryCommand.toLowerCase() === "grind") {
         let guildchannels = Array.from(receivedMessage.guild.channels.values());
-        guildchannels.filter((channel) => channel.type == "voice");
+        guildchannels = guildchannels.filter((channel) => channel.type == "voice");
         let diechannel = guildchannels[guildchannels.length-1];
 
         let count = diechannel.members.size
@@ -114,7 +114,7 @@ function processCommand(receivedMessage) {
         else {
 
             let guildchannels = Array.from(receivedMessage.guild.channels.values()); //all channels in the current server
-            guildchannels.filter((channel) => channel.type == "voice");
+            guildchannels = guildchannels.filter((channel) => channel.type == "voice");
             let diechannel = guildchannels[guildchannels.length-1]; //die channel will go here
             let membercollection = []; //list of all members present in a voice channel
 
@@ -157,7 +157,7 @@ function processCommand(receivedMessage) {
         let count = 0;
         let guildchannels = Array.from(receivedMessage.guild.channels.values());
         const now = new Date();
-        guildchannels.filter((channel) => channel.type == "voice");
+        guildchannels = guildchannels.filter((channel) => channel.type == "voice");
         
         if(now - lastKillCommandDate > 30*1000) {
 
