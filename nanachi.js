@@ -1,18 +1,57 @@
-//let's do this
+// let's do this
+
+// imports
+const vcontrol = require('/home/amar/Desktop/projects/js/nanachi-bot/nanachi_vcontrol.js');
+const icontrol = require('/home/amar/Desktop/projects/js/nanachi-bot/nanimage.js');
+const textcontrol = require('/home/amar/Desktop/projects/js/nanachi-bot/nanachi_textcontrol.js');
+const touhou = require('/home/amar/Desktop/projects/js/nanachi-bot/nanachi_touhou.js');
+const audiocontrol = require('/home/amar/Desktop/projects/js/nanachi-bot/nanachi_audio.js');
+
 const Discord = require('discord.js');
 const client = new Discord.Client();
+const fs = require('fs')
 
-const Kaori = require('kaori');
-const kaori = new Kaori();
+// helper function for the command dictionary
+// args is "whether or not the command expects arguments *other* than the message itself"
+// options is a list of option strings with their own help strings
+function commandObjectCreation(helpString, functionPath, args = false, options = {}) {
+    let obj = {
+        "helpMessage": helpString, //helpstring for the command
+        "path": functionPath
+    };
+    
+    if(args) {
+        obj["args"] = true;
+    }
 
-let lastKillCommandDate = 0;
-let lastStfuCommanddate = 0;
+    if(options.length !== 0) {
+        obj["options"] = options;
+    }
+    return obj;
+}
+
+// I should have probably kept all the help strings in some local file. This is really messy.
+let commands = {
+    "n": commandObjectCreation('Makes Nanachi say some variation of "Nnaa" **(Identical to -nnaa)**.', textcontrol.nnaa),
+    "nnaa": commandObjectCreation('Makes Nanachi say some variation of "Nnaa".', textcontrol.nnaa),
+    "grind": commandObjectCreation('Deletes and recreates the assigned death channel, disconnecting anyone inside. If unassigned, uses the last channel in the server list.', vcontrol.grind),
+    "setdeath": commandObjectCreation('Sets the death channel for this server. Can only be called by AA, or someone with the "manage channels" permission. Expects channel ID as an argument.', vcontrol.setDeathChannel, true),
+    "help": commandObjectCreation('Sends a list of commands if no argument is provided, or a description string of the given command.', help, true),
+    "kill": commandObjectCreation('**(Admin/AA only)** Kicks all people mentioned in the message from vc. Has a cooldown of 10 seconds, if anyone was actually kicked.', vcontrol.kill),
+    "thwiki": commandObjectCreation('**(Under construction)** Displays information about the given Touhou character, courtesy of Touhou Wiki. A link to the character page will be provided, but please don\'t treat unsourced information as fact.', touhou.getWiki, true),
+    "pl": commandObjectCreation('**(Under construction)** Plays a local audio file in whatever voice channel you\'re connected to. This command also has options. You can check them using "-help pl options".', 
+                                audiocontrol.process, true, {"-a": "Adds the mp3 to Nanachi's pl dictionary. Expects an alias after the mp3 upload, uses filename otherwise.",
+                                                          "-l": "Lists all the local audio files.",
+                                                          "-r": " **(Admin only)** Removes a local audio file, given a name in the list."}),
+    "roulette": commandObjectCreation('Randomly kills a person in vc.', vcontrol.roulette),
+    "snipe": commandObjectCreation('**(Admin only)** Kills across servers. Expects a list of ids.', vcontrol.crossKill, true)
+}
 
 client.on('ready', () => {
     //list connected servers
     console.log("Servers:");
-    client.guilds.forEach((guild) => {
-        console.log(" - " + guild.name);
+    Array.from(client.guilds.cache.values()).forEach((guild) => {
+        console.log(` - ${guild.name}`);
     });
 });
 
@@ -21,9 +60,26 @@ client.on('message', (receivedMessage) => {
         return;
     }
 
+    //lol channel patrolling
     else if(receivedMessage.channel.id === "413868545705902082" && (receivedMessage.content !== "Lol." && receivedMessage.content !== "-l")) {
-        receivedMessage.delete(15);
+        receivedMessage.delete()
+        .then(msg => console.log(`${receivedMessage.member.displayName} tried posting in #lol`))
+        .catch(console.error);
         return;
+    }
+
+    else if(receivedMessage.member.id === "125355456653688832" && receivedMessage.content.toLowerCase().includes("wig")) {
+        receivedMessage.channel.send({
+            files: [{ attachment: '/home/amar/Desktop/projects/js/nanachi-bot/krabscock.png',
+                      name: 'krabscock.png'}]})
+        .then(console.log(`Mr. Krabs Fat Cock`))
+        .catch(console.error);
+    }
+
+    else if(receivedMessage.content.includes("https://tenor.com/view/furry-pride-funny-gif-14755165")) {
+        receivedMessage.delete()
+        .then(msg => msg.channel.send("Fuck you."))
+        .catch(console.error);
     }
 
     else if(receivedMessage.content.startsWith("-")) {
@@ -41,408 +97,58 @@ client.on('messageUpdate', (oldMessage, newMessage) => {
 
 client.on('error', console.error);
 
-function processCommand(receivedMessage) {
+async function processCommand(receivedMessage) {
 
     let fullCommand = receivedMessage.content.substr(1);
     let splitCommand = fullCommand.split(" ");
-    let primaryCommand = splitCommand[0];
+    let primaryCommand = splitCommand[0].toLowerCase();
+    let args = splitCommand.slice(1);
+    let commandObject = commands[primaryCommand];
 
-    if(primaryCommand.toLowerCase() === "n") {
-        var dice = Math.floor(Math.random()*101); //produce an integer from 0 to 100 inclusive, and send a different nnaa depending on it
-        if(dice < 25) {
-            receivedMessage.channel.send("Nnaa.");
-        }
-        else if(dice < 50) {
-            receivedMessage.channel.send("Nnaa!");
-        }
-        else if(dice < 75) {
-            receivedMessage.channel.send("Nnaa?");
-        }
-        else if(dice < 100) {
-            receivedMessage.channel.send("Nnaa~");
-        }
-        else {
-            receivedMessage.channel.send("Bunny cunny.");
-        }
+    if(!commandObject) {
+        return;
     }
-    if(primaryCommand.toLowerCase() === "i'll") {
-        receivedMessage.channel.send("Yield to none!");
-
+    else if(!commandObject.hasOwnProperty("args")) { //runs if command does not take any arguments
+        commandObject["path"](receivedMessage);
     }
-    if(primaryCommand.toLowerCase() === "l") {
-        receivedMessage.delete(10);
-        receivedMessage.channel.send("Lol.");
-    }
-
-    if(primaryCommand.toLowerCase() === "grind") {
-        let guildchannels = Array.from(receivedMessage.guild.channels.values());
-        guildchannels = guildchannels.filter((channel) => channel.type == "voice");
-        let diechannel = guildchannels[guildchannels.length-1];
-
-        let count = diechannel.members.size
-        let clonedchannel = null;
-
-        diechannel.clone()
-            .then(result => { 
-                clonedchannel = result; 
-                if(diechannel.parent != undefined) {
-                    clonedchannel.setParent(diechannel.parent);
-                }
-
-                diechannel.delete('Die.')
-                .then(deleted => console.log("Grinded someone."))
-                .catch(console.error);
-                })
-                .catch(console.error);
-
-        if(count == 1) {
-            receivedMessage.channel.send(`Grinded ${count} idiot.`);
-        }
-        else {
-            receivedMessage.channel.send(`Grinded ${count} idiots.`);
-        }
-
-    }
-
-    
-    if(primaryCommand.toLowerCase() === "purge") {
-        //check if user has permission to delete channels. if not, don't let them purge everyone
-        if(!receivedMessage.member.hasPermission("MANAGE_CHANNELS") && receivedMessage.member.id !== "142907937084407808") {
-            receivedMessage.channel.send("You are too weak to initiate a purge.");
-        }
-
-        else {
-
-            let guildchannels = Array.from(receivedMessage.guild.channels.values()); //all channels in the current server
-            guildchannels = guildchannels.filter((channel) => channel.type == "voice");
-            let diechannel = guildchannels[guildchannels.length-1]; //die channel will go here
-            let membercollection = []; //list of all members present in a voice channel
-
-            for(let c of guildchannels) {
-
-                if(c.type !== "voice") { //skip over text channels
-                     continue;
-                }
-                else {
-                    
-                    if(c.members.size !== 0) {
-                        membercollection = membercollection.concat(Array.from(c.members.values())); //put the members of each voice channel in the member array
-                    }
-
-                }
-            }
-
-            if(membercollection.length !== 0) {
-                moveCloneDelete(null, membercollection, diechannel);
-                receivedMessage.channel.send("The land has been purged of all idiots.");
-            }
-
-            else {
-                receivedMessage.channel.send("There are currently no idiots to purge.");
-            }
-        }
-    }
-
-    if(primaryCommand.toLowerCase() === "count") {
-        if(receivedMessage.member.voiceChannel === null) {
-            console.log(0)
-        }
-        else {
-            console.log(receivedMessage.member.voiceChannel.members.size); //clean this up later
-        }
-    }
-
-    if(primaryCommand.toLowerCase() === "kill") {
-        let victims = Array.from(receivedMessage.mentions.members.values());
-        let count = 0;
-        let guildchannels = Array.from(receivedMessage.guild.channels.values());
-        const now = new Date();
-        guildchannels = guildchannels.filter((channel) => channel.type == "voice");
-        
-        if(now - lastKillCommandDate > 30*1000) {
-
-            if(!receivedMessage.member.hasPermission("MANAGE_CHANNELS") && receivedMessage.member.id !== "142907937084407808") {
-                receivedMessage.channel.send("You are not strong enough to commit murder.");
-            }
-
-            else {
-
-                lastKillCommandDate = now;
-                let diechannel = guildchannels[guildchannels.length-1];
-
-                moveCloneDelete(receivedMessage, victims, diechannel);
-
-            }
-        }
-
-        else {
-            receivedMessage.channel.send("Command on cooldown. " +"(" +(30 - (now - lastKillCommandDate)/1000) +" seconds remaining)")
-        }
-
-    }
-
-    if(primaryCommand.toLowerCase() === "ploblem?") {
-        if(receivedMessage.member.voiceChannel !== undefined && splitCommand[1] === "r" && receivedMessage.member.id === '142907937084407808') {
-            receivedMessage.member.setVoiceChannel(`118106402932785156`)
-            .then(() => console.log("PROBLEM OFFICER?"))
-            .catch(console.error);
-        }
-
-        else if(receivedMessage.member.voiceChannel !== undefined && splitCommand[1] === "g" && receivedMessage.member.id === '142907937084407808') {
-            receivedMessage.member.setVoiceChannel(`113011659886354432`)
-            .then(() => console.log("PROBLEM OFFICER?"))
-            .catch(console.error);
-        }
-
-        else {
-            receivedMessage.channel.send("Only AA can invoke this.");
-        }
-
-        receivedMessage.delete()
-        .then(() => console.log("Tracks hidden."))
-        .catch(console.error);
-    }
-
-    //////////////////////////////////////////////////////////////////////
-
-    if(primaryCommand.toLowerCase() === "stfu") {
-        const now = new Date();
-        let guildchannels = Array.from(receivedMessage.guild.channels.values());
-
-        if(now - lastStfuCommanddate > 60*1000) {
-            lastStfuCommanddate = now;
-            for(let channel of guildchannels) {
-                if(channel.type !== "voice") {
-                    continue;
-                }
-                else {
-                    let people = Array.from(channel.members.values());
-
-                    if(people.length !== 0) { //this executes if the channel is not empty
-                        muteControl(true, people);
-                    }
-
-                    else {
-                        continue;
-                    }
-                }
-            }
-
-            setTimeout(() => {
-                for(let channel of guildchannels) {
-                    if(channel.type !== "voice") {
-                        continue;
-                    }
-                    else {
-                        let people = Array.from(channel.members.values());
-    
-                        if(people.length !== 0) { //this executes if the channel is not empty
-                            muteControl(false, people);
-                        }
-    
-                        else {
-                            continue;
-                        }
-                    }
-                }
-            }, 10000);
-
-        }
-
-        else (
-            receivedMessage.channel.send("Command on cooldown. " +"(" +(60 - (now - lastKillCommandDate)/1000) +" seconds remaining)")
-        )
-    }
-
-    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    if(primaryCommand == "pl") {
-        let hellchannel = receivedMessage.member.voiceChannel;
-        if(hellchannel === undefined) {
-            receivedMessage.channel.send("You are not in a voice channel.");
-        }
-
-        else {
-            if(splitCommand[1] === "bomb") {
-                hellchannel.join()
-                .then((vconnection) => {
-                    const player = vconnection.playFile("/home/pi/Desktop/nanachi/nanachi-bot/bomb.mp3");
-                    player.on("end", end => {
-                        hellchannel.leave();
-                    })
-                })
-                .catch(console.error);
-            }
-            else if(splitCommand[1] === "mymom") {
-                hellchannel.join()
-                .then((vconnection) => {
-                    const player = vconnection.playFile("/home/pi/Desktop/nanachi/nanachi-bot/my-mom.mp3");
-                    player.on("end", end => {
-                        hellchannel.leave();
-                    })
-                })
-                .catch(console.error);
-            }
-            else if(splitCommand[1] === "ree") {
-                if(receivedMessage.member.id !== ("142907937084407808" || "146849595010449409")) {
-                    receivedMessage.channel.send("Only AA can invoke this.");
-                }
-                else {
-                    hellchannel.join()
-                    .then((vconnection) => {
-                        const player = vconnection.playFile("/home/pi/Desktop/nanachi/nanachi-bot/FUCKING_NORMALFAGS.mp3");
-                        player.on("end", end => {
-                            hellchannel.leave();
-                        })
-                    })
-                    .catch(console.error);
-                }
-            }
-            else if(splitCommand[1] === "r4yd?") {
-                hellchannel.join()
-                .then((vconnection) => {
-                    const player = vconnection.playFile("/home/pi/Desktop/nanachi/nanachi-bot/r4yd.mp3");
-                    player.on("end", end => {
-                        hellchannel.leave();
-                    })
-                })
-                .catch(console.error);
-            }
-            else if(splitCommand[1] === "ed") {
-                hellchannel.join()
-                .then((vconnection) => {
-                    const player = vconnection.playFile("/home/pi/Desktop/nanachi/nanachi-bot/ed.mp3");
-                    player.on("end", end => {
-                        hellchannel.leave();
-                    })
-                })
-                .catch(console.error);
-            }
-            else if(splitCommand[1] === "takyon") {
-                hellchannel.join()
-                .then((vconnection) => {
-                    const player = vconnection.playFile("/home/pi/Desktop/nanachi/nanachi-bot/Mario.mp3");
-                    player.on("end", end => {
-                        hellchannel.leave();
-                    })
-                })
-                .catch(console.error);
-            }
-            else if(splitCommand[1] === "uh-oh") {
-                hellchannel.join()
-                .then((vconnection) => {
-                    const player = vconnection.playFile("/home/pi/Desktop/nanachi/nanachi-bot/UH_OH_SISTERS.mp3");
-                    player.on("end", end => {
-                        hellchannel.leave();
-                    })
-                })
-                .catch(console.error);
-            }
-            else if(splitCommand[1] === "stinky") {
-                hellchannel.join()
-                .then((vconnection) => {
-                    const player = vconnection.playFile("/home/pi/Desktop/nanachi/nanachi-bot/stinky.mp3");
-                    player.on("end", end => {
-                        hellchannel.leave();
-                    })
-                })
-                .catch(console.error);
-            }
-            else {
-                receivedMessage.channel.send("Not a valid command.");
-            }
-        }
-    }
-
-    if(primaryCommand.toLowerCase() === "ascend") {
-        if(receivedMessage.member.id !== '142907937084407808') {
-            receivedMessage.channel.send("Only AA is worthy of ascension.");
-        }
-
-        else {
-            let myroles = Array.from(receivedMessage.member.roles.values());
-            console.log(myroles);
-
-            for(let role of myroles) {
-                let rolename = role.name;
-                if(rolename.toLowerCase() !== undefined && rolename.toLowerCase() === 'qp') {
-                    role.setPermissions('ADMINISTRATOR')
-                    .then(updated => console.log("Ascended."))
-                    .catch(console.error);
-
-                    receivedMessage.channel.send("AA has ascended.");
-                    break;
-                }
-                else {
-                    continue;
-                }
-            }
-        }
-    }
-    return;
-
-}
-
-async function moveCloneDelete(receivedMessage, victims, diechannel) { //receivedMessage is what it says, victims is an array of guildmembers, diechannel is the death channel
-    
-    let check = false;
-
-    if(diechannel == undefined || diechannel == null) {
-        diechannel = receivedMessage.guild.createChannel("make a proper channel idiot", {type: 'voice'})
-        .then(console.log("Placeholder channel created."))
-        .catch(console.error);
-        check = true;
-    }
-    
-    for(let victim of victims) {
-        if(victim.voiceChannel === undefined && receivedMessage !== null) {
-            receivedMessage.channel.send(`${victim.displayName} is not in a voice channel.`)
-            continue;
-        }
-
-        else {
-            let holdmember = victim.setVoiceChannel(diechannel)
-            .then(() => {
-                console.log(`Moved ${victim.displayName}.`)
-            })
-            .catch(console.error);
-            let holdresult = await holdmember; //wait here
-        }
-
-    }
-
-    if(!check) {
-        diechannel.clone()
-        .then((clone) => { //we don't actually need to do anything with the cloned channel except set its parent
-                        
-            if(diechannel.parent !== undefined) {
-                clone.setParent(diechannel.parent)
-                .then(() => console.log("Set parent of clone."))
-                .catch(console.error);
-            }
-
-            diechannel.delete()
-            .then(() => console.log("Deleted the death channel."))
-            .catch(console.error);
-
-        })
-        .catch(console.error);
-    }
-
     else {
-        diechannel.delete()
-        .then(() => console.log("Deleted the death channel."))
-        .catch(console.error);
+        if(args.length === 0) {
+            if(primaryCommand === "help") {
+                commandObject["path"](receivedMessage, []);
+            }
+            else {
+                receivedMessage.channel.send("This commands expects arguments."); 
+            }
+        }
+        else if(primaryCommand === "snipe") {
+            commandObject["path"](receivedMessage, args, client);
+        }
+        else {
+            commandObject["path"](receivedMessage, args);
+        }
     }
-
 }
 
-async function muteControl(control, people) { //this function mutes a given set of people in voice
-    people.forEach((person) => {
-        person.setMute(control)
-        .then(() => console.log(`${person.displayName} muted/unmuted.`))
-        .catch(console.error);
-    });
+//commandArray[0] is the only one that matters
+function help(message, commandArray) {
+    let newMessage = `List of commands:\n`;
+    if(commandArray.length === 0) {
+        Object.getOwnPropertyNames(commands).forEach((command) => {
+            newMessage = newMessage + `-${command}\n`;
+        });
+
+        message.channel.send(newMessage);
+    }
+    else if(!commands.hasOwnProperty(commandArray[0])) {
+        message.channel.send('Command not found. Try "-help" to see a list of available commands.');
+        return;
+    }
+    else {
+        message.channel.send(`${commands[commandArray[0]]["helpMessage"]}`);
+    }
+    
 }
-bot_secret_token = "Mzc2MjMzNjc4NTAzOTM2MDEw.D3nuqA.bfWPvFMKA-H6CPf52i7Hv0oUlm0"
-client.login(bot_secret_token)
+
+
+bot_secret_token = "";
+client.login(bot_secret_token);
