@@ -1,8 +1,17 @@
 const Discord = require('discord.js');
 const fs = require('fs');
+const Nanachi = require('./nanachi.js');
+
+/**
+ * Nanachi client object.
+ * @type {Discord.Client}
+ */
+
+const client = Nanachi['client'];
 
 let lastKillCommandDate = 0;
 let lastStfuCommanddate = 0;
+let roleToObserve = null;
 
 function grind(message) {
     
@@ -77,7 +86,7 @@ function kill(message, victims = undefined) {
  * @param {Array} id An array of people to kill.
  * @param {Discord.Client} client This is just Nanachi's client instance. It's needed for things to work.
  */
-function crossKill(message, id, client) {
+function snipe(message, id, client) {
     
 
     if(!(message.member.hasPermission("ADMINISTRATOR") || message.member.id === "142907937084407808")) {
@@ -209,4 +218,61 @@ function setDeathChannel(message, argsArray) {
     }
 }
 
-module.exports = {grind, roulette, scramble, setDeathChannel, kill, crossKill};
+/**
+ * 
+ * @param {Discord.Message} message Discord message
+ * @param {string} rolesToObserve Array of roles to observe
+ * @return This function doesn't return anything,  
+ */
+function observe(message, newRoleToObserve) {
+
+    roleToObserve = newRoleToObserve.join(" ");
+
+    let voicechannels = (Array.from(message.guild.channels.cache.values())).filter((channel) => {
+        return (channel.type === "voice")
+    });
+    let callerChannel = message.member.voice.channel;
+    let voiceConnections = Array.from(client.voice.connections.values()); 
+    let voiceStatus = voiceConnections.find(connection => {
+        return (connection.channel.guild.id === message.guild.id); 
+    });
+
+    if(voiceStatus) {
+        message.channel.send("Already observing.");
+        return;
+    }
+
+    callerChannel.join()
+    .then((connection) => {
+        connection.play("./join.mp3");
+        return connection;
+    })
+    .then((connection) => {
+        connection.on('speaking', (user, speaking) => {
+            if(user) {
+                console.log(`${user.username} is speaking`);
+                let member = getGuildMemberFromUser(user, callerChannel.guild);
+                if(user.id === member.id) {
+                    if(Array.from(member.roles.cache.values()).some(role => role.name === roleToObserve)) {
+                        member.voice.kick()
+                        .then(() => console.log(`Kicked ${member.displayName}`))
+                        .catch(console.error);
+                    }
+                }
+            }
+        });
+    })
+    .catch(console.error);
+
+    return;
+}
+/**
+ * 
+ * @param {Discord.User} user 
+ * @param {Discord.Guild} guild 
+ */
+function getGuildMemberFromUser(user, guild) {
+    return (Array.from(guild.members.cache.values()).find(member => member.id === user.id));
+}
+
+module.exports = {grind, roulette, scramble, setDeathChannel, kill, snipe, observe};

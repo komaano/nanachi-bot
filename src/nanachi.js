@@ -1,20 +1,23 @@
 // let's do this
 
 // imports
+const Discord = require('discord.js');
+const client = new Discord.Client();
+const fs = require('fs');
+module.exports = {client};
+
 const vcontrol = require('./nanachi_vcontrol.js');
 const icontrol = require('./nanimage.js');
 const textcontrol = require('./nanachi_textcontrol.js');
 const touhou = require('./nanachi_touhou.js');
 const audiocontrol = require('./nanachi_audio.js');
-
-const Discord = require('discord.js');
-const client = new Discord.Client();
-const fs = require('fs')
+const auth = require('./auth.json');
+const commandHelp = require('./Commands.json');
 
 // helper function for the command dictionary
 // args is "whether or not the command expects arguments *other* than the message itself"
 // options is a list of option strings with their own help strings
-function commandObjectCreation(helpString, functionPath, args = false, options = {}) {
+function commandObjectCreation(helpString, functionPath, args = false) {
     let obj = {
         "helpMessage": helpString, //helpstring for the command
         "path": functionPath
@@ -24,27 +27,22 @@ function commandObjectCreation(helpString, functionPath, args = false, options =
         obj["args"] = true;
     }
 
-    if(options.length !== 0) {
-        obj["options"] = options;
-    }
     return obj;
 }
 
 // I should have probably kept all the help strings in some local file. This is really messy.
 let commands = {
-    "n": commandObjectCreation('Makes Nanachi say some variation of "Nnaa" **(Identical to -nnaa)**.', textcontrol.nnaa),
-    "nnaa": commandObjectCreation('Makes Nanachi say some variation of "Nnaa".', textcontrol.nnaa),
-    "grind": commandObjectCreation('Deletes and recreates the assigned death channel, disconnecting anyone inside. If unassigned, uses the last channel in the server list.', vcontrol.grind),
-    "setdeath": commandObjectCreation('Sets the death channel for this server. Can only be called by AA, or someone with the "manage channels" permission. Expects channel ID as an argument.', vcontrol.setDeathChannel, true),
-    "help": commandObjectCreation('Sends a list of commands if no argument is provided, or a description string of the given command.', help, true),
-    "kill": commandObjectCreation('**(Admin/AA only)** Kicks all people mentioned in the message from vc. Has a cooldown of 10 seconds, if anyone was actually kicked.', vcontrol.kill),
-    "thwiki": commandObjectCreation('**(Under construction)** Displays information about the given Touhou character, courtesy of Touhou Wiki. A link to the character page will be provided, but please don\'t treat unsourced information as fact.', touhou.getWiki, true),
-    "pl": commandObjectCreation('**(Under construction)** Plays a local audio file in whatever voice channel you\'re connected to. This command also has options. You can check them using "-help pl options".', 
-                                audiocontrol.process, true, {"-a": "Adds the mp3 to Nanachi's pl dictionary. Expects an alias after the mp3 upload, uses filename otherwise.",
-                                                          "-l": "Lists all the local audio files.",
-                                                          "-r": " **(Admin only)** Removes a local audio file, given a name in the list."}),
-    "roulette": commandObjectCreation('Randomly kills a person in vc.', vcontrol.roulette),
-    "snipe": commandObjectCreation('**(Admin only)** Kills across servers. Expects a list of ids.', vcontrol.crossKill, true)
+    "n": commandObjectCreation(commandHelp["n"], textcontrol.nnaa),
+    "nnaa": commandObjectCreation(commandHelp["nnaa"], textcontrol.nnaa),
+    "grind": commandObjectCreation(commandHelp["grind"], vcontrol.grind),
+    "setdeath": commandObjectCreation(commandHelp["setdeath"], vcontrol.setDeathChannel, true),
+    "help": commandObjectCreation(commandHelp["help"], help, true),
+    "kill": commandObjectCreation(commandHelp["kill"], vcontrol.kill),
+    "thwiki": commandObjectCreation(commandHelp["thwiki"], touhou.getWiki, true),
+    "pl": commandObjectCreation(commandHelp["pl"], audiocontrol.process, true),
+    "roulette": commandObjectCreation(commandHelp["roulette"], vcontrol.roulette),
+    "snipe": commandObjectCreation(commandHelp["snipe"], vcontrol.snipe, true),
+    "observe": commandObjectCreation(commandHelp["observe"], vcontrol.observe, true)
 }
 
 client.on('ready', () => {
@@ -149,6 +147,4 @@ function help(message, commandArray) {
     
 }
 
-
-bot_secret_token = "";
-client.login(bot_secret_token);
+client.login(auth['token']);

@@ -1,0 +1,13 @@
+{
+    "n": "Makes Nanachi say some variation of 'Nnaa' **(Identical to -nnaa)**.",
+    "nnaa": "Makes Nanachi say some variation of 'Nnaa'.",
+    "grind": "Deletes and recreates the assigned death channel, disconnecting anyone inside. If unassigned, uses the last channel in the server list.",
+    "setdeath": "Sets the death channel for this server. Can only be called by AA, or someone with the 'manage channels' permission. Expects channel ID as an argument.",
+    "help": "Sends a list of commands if no argument is provided, or a description string of the given command.",
+    "kill": "**(Admin/AA only)** Kicks all people mentioned in the message from vc. Has a cooldown of 10 seconds, if anyone was actually kicked.",
+    "thwiki": "(**(Under construction)** Displays information about the given Touhou character, courtesy of Touhou Wiki. A link to the character page will be provided, but please don't treat unsourced information as fact.",
+    "pl": "**(Under construction)** Plays a local audio file in whatever voice channel you're connected to. This command also has the options 'a', 'l' and 'r'.",   
+    "roulette": "Randomly kills a person in vc.",
+    "snipe": "**(Admin only)** Kills across servers. Expects a list of ids.",
+    "observe": "Joins the death channel and observes the given role. Kills anyone with that role if they speak."
+}
