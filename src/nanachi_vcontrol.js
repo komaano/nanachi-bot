@@ -1,17 +1,27 @@
-const Discord = require('discord.js');
-const fs = require('fs');
-const Nanachi = require('./nanachi.js');
-
+const reqClient = require('./client.js');
 /**
  * Nanachi client object.
  * @type {Discord.Client}
  */
 
-const client = Nanachi['client'];
+const client = reqClient.client;
+const Discord = require('discord.js');
+const fs = require('fs');
+const Event = require('events');
+const observeEmitter = new Event.EventEmitter();
 
+const nanachiVoiceStates = {
+    NOT_CONNECTED: "not_connected",
+    NEUTRAL: "neutral",
+    OBSERVING: "observing",
+    PLAYING: "playing"
+}
 let lastKillCommandDate = 0;
 let lastStfuCommanddate = 0;
-let roleToObserve = null;
+let nanachiVoiceState = nanachiVoiceStates.NOT_CONNECTED;
+ 
+
+observeEmitter.on('undefinedUser', handleUndefinedUser);
 
 function grind(message) {
     
@@ -178,8 +188,7 @@ function moveCloneDelete(diechannel, deathchannels, victim = null) {
 
 //argsArray is an array of arguments in the message. The first argument is expected to be the name of the death channel, or the ID of the death channel.
 function setDeathChannel(message, argsArray) {
-    let deathchannelString= argsArray[0];
-
+    let deathchannelString = argsArray[0];
     if(!(message.member.hasPermission("MANAGE_CHANNELS") || message.member.id === "142907937084407808")) {
         message.channel.send("You do not have permission to change the death channel.");
         return;
@@ -221,26 +230,36 @@ function setDeathChannel(message, argsArray) {
 /**
  * 
  * @param {Discord.Message} message Discord message
- * @param {string} rolesToObserve Array of roles to observe
+ * @param {Array} newRoleToObserve Role to observe, comes as an array of space separated strings
+ * @param {Discord.Client} client Nanachi client instance
  * @return This function doesn't return anything,  
  */
-function observe(message, newRoleToObserve) {
 
-    roleToObserve = newRoleToObserve.join(" ");
+function observe(message, newRoleToObserve, client, callerChannel=undefined) {
 
-    let voicechannels = (Array.from(message.guild.channels.cache.values())).filter((channel) => {
-        return (channel.type === "voice")
-    });
-    let callerChannel = message.member.voice.channel;
-    let voiceConnections = Array.from(client.voice.connections.values()); 
-    let voiceStatus = voiceConnections.find(connection => {
-        return (connection.channel.guild.id === message.guild.id); 
-    });
-
-    if(voiceStatus) {
-        message.channel.send("Already observing.");
+    if(nanachiVoiceState === nanachiVoiceStates.PLAYING) {
+        message.channel.send("Cannot observe while playing audio.");
         return;
     }
+
+    if(!message.member.voice.channel) {
+        message.channel.send("You aren't in a voice channel. Finding most populated channel...");
+        callerChannel = getLargestChannel(message.guild);
+        
+        if(callerChannel.members.size === 0) {
+            message.channel.send("Nobody is in vc.");
+            return;
+        }
+
+    }
+
+    else {
+        callerChannel = message.member.voice.channel;
+    }
+
+    roleToObserve = newRoleToObserve.join(" ");
+    nanachiVoiceState = nanachiVoiceStates.OBSERVING;
+    message.channel.send(`Observing ${roleToObserve}`);
 
     callerChannel.join()
     .then((connection) => {
@@ -249,7 +268,7 @@ function observe(message, newRoleToObserve) {
     })
     .then((connection) => {
         connection.on('speaking', (user, speaking) => {
-            if(user) {
+            if(user && nanachiVoiceState === nanachiVoiceStates.OBSERVING) {
                 console.log(`${user.username} is speaking`);
                 let member = getGuildMemberFromUser(user, callerChannel.guild);
                 if(user.id === member.id) {
@@ -259,6 +278,17 @@ function observe(message, newRoleToObserve) {
                         .catch(console.error);
                     }
                 }
+                return;
+            }
+
+            else {
+                
+                if(nanachiVoiceState === nanachiVoiceStates.OBSERVING) {
+                    connection.disconnect();
+                    observeEmitter.emit('undefinedUser', message, newRoleToObserve, callerChannel);
+                }
+
+                return;
             }
         });
     })
@@ -266,6 +296,35 @@ function observe(message, newRoleToObserve) {
 
     return;
 }
+
+function stopObserving(message) {
+    nanachiVoiceState === nanachiVoiceStates.NEUTRAL;
+    message.channel.send("No longer observing.");
+    return;
+}
+
+function leave(message) {
+    let voiceConnections = Array.from(client.voice.connections.values());
+    let guildVoiceConnection = voiceConnections.find(connection => {
+        return (connection.channel.guild.id === message.guild.id); 
+    });
+
+    guildVoiceConnection ? guildVoiceConnection.disconnect() : message.channel.send("Not currently in vc.");
+    return;
+}
+/**
+ * 
+ * @param {Discord.Message} message 
+ * @param {string} roleToObserve 
+ * @param {Discord.GuildChannel} callerChannel  
+ */
+function handleUndefinedUser(message, roleToObserve, callerChannel) {
+    console.log(`event received; Voice State: ${nanachiVoiceState}`);
+    if(nanachiVoiceState === nanachiVoiceStates.OBSERVING) {
+        setTimeout(() => observe(message, roleToObserve, client, callerChannel), 350);
+    }
+}
+
 /**
  * 
  * @param {Discord.User} user 
@@ -275,4 +334,18 @@ function getGuildMemberFromUser(user, guild) {
     return (Array.from(guild.members.cache.values()).find(member => member.id === user.id));
 }
 
-module.exports = {grind, roulette, scramble, setDeathChannel, kill, snipe, observe};
+/**
+ * 
+ * @param {Discord.Guild} guild A discord server.
+ * @returns {Discord.GuildChannel} guildChannel 
+ */
+function getLargestChannel(guild) {
+    let voiceChannels = (Array.from(guild.channels.cache.values())).filter(channel => channel.type === 'voice');
+    return (voiceChannels.reduce((accum, curr) => {
+        accum = accum.members.size > curr.members.size ? accum : curr;
+        return accum;
+    }, voiceChannels[0]));
+}
+
+module.exports = {grind, roulette, scramble, setDeathChannel, kill, 
+                  snipe, observe, stopObserving, leave};

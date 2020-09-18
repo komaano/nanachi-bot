@@ -2,10 +2,9 @@
 
 // imports
 const Discord = require('discord.js');
-const client = new Discord.Client();
+const reqClient = require('./client.js');
+const client = reqClient.client;
 const fs = require('fs');
-module.exports = {client};
-
 const vcontrol = require('./nanachi_vcontrol.js');
 const icontrol = require('./nanimage.js');
 const textcontrol = require('./nanachi_textcontrol.js');
@@ -42,7 +41,9 @@ let commands = {
     "pl": commandObjectCreation(commandHelp["pl"], audiocontrol.process, true),
     "roulette": commandObjectCreation(commandHelp["roulette"], vcontrol.roulette),
     "snipe": commandObjectCreation(commandHelp["snipe"], vcontrol.snipe, true),
-    "observe": commandObjectCreation(commandHelp["observe"], vcontrol.observe, true)
+    "observe": commandObjectCreation(commandHelp["observe"], vcontrol.observe, true),
+    "stopobserve": commandObjectCreation(commandHelp["stopobserve"], vcontrol.stopObserving),
+    "leave": commandObjectCreation(commandHelp["leave"], vcontrol.leave)
 }
 
 client.on('ready', () => {
@@ -118,7 +119,7 @@ async function processCommand(receivedMessage) {
                 receivedMessage.channel.send("This commands expects arguments."); 
             }
         }
-        else if(primaryCommand === "snipe") {
+        else if(primaryCommand === "snipe" || primaryCommand === "observe") {
             commandObject["path"](receivedMessage, args, client);
         }
         else {
