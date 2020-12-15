@@ -43,7 +43,11 @@ let commands = {
     "snipe": commandObjectCreation(commandHelp["snipe"], vcontrol.snipe, true),
     "observe": commandObjectCreation(commandHelp["observe"], vcontrol.observe, true),
     "stopobserve": commandObjectCreation(commandHelp["stopobserve"], vcontrol.stopObserving),
-    "leave": commandObjectCreation(commandHelp["leave"], vcontrol.leave)
+    "leave": commandObjectCreation(commandHelp["leave"], vcontrol.leave),
+    "kenemoko": commandObjectCreation(commandHelp["kenemoko"], touhou.kenemoko),
+    "joinbomb": commandObjectCreation("lol", vcontrol.joinBomb),
+    "wide19": commandObjectCreation(commandHelp["wide19"], icontrol.wide19),
+    "timecube": commandObjectCreation(commandHelp["timecube"], textcontrol.timecube)
 }
 
 client.on('ready', () => {
@@ -133,7 +137,9 @@ function help(message, commandArray) {
     let newMessage = `List of commands:\n`;
     if(commandArray.length === 0) {
         Object.getOwnPropertyNames(commands).forEach((command) => {
-            newMessage = newMessage + `-${command}\n`;
+            if(command !== "joinbomb") {
+                newMessage = newMessage + `-${command}\n`;
+            }
         });
 
         message.channel.send(newMessage);

@@ -14,10 +14,12 @@ const nanachiVoiceStates = {
     NOT_CONNECTED: "not_connected",
     NEUTRAL: "neutral",
     OBSERVING: "observing",
-    PLAYING: "playing"
+    PLAYING: "playing",
+    SWITCHING: "switching" //acts as a buffer between states 
 }
+
 let lastKillCommandDate = 0;
-let lastStfuCommanddate = 0;
+let lastBombCommandDate = 0;
 let nanachiVoiceState = nanachiVoiceStates.NOT_CONNECTED;
  
 
@@ -145,7 +147,7 @@ function scramble(message) {
     });
     
     voicemembers = voicechannels.reduce((total, voicechannel) => {
-        total = total.concat(Array.from(voicechannel.members.values()))
+        total = total.concat(Array.from(voicechannel.members.values()));
         return total;
     }, []);
 
@@ -206,7 +208,7 @@ function setDeathChannel(message, argsArray) {
 
             if(err) {
                 console.log(`Failed to read file: ${err}`);
-                deathchannels = {};
+                let deathchannels = {};
                 return;
             }
 
@@ -235,31 +237,36 @@ function setDeathChannel(message, argsArray) {
  * @return This function doesn't return anything,  
  */
 
-function observe(message, newRoleToObserve, client, callerChannel=undefined) {
+function observe(message, newRoleToObserve, client, callerChannel=undefined, notify=true) {
 
-    if(nanachiVoiceState === nanachiVoiceStates.PLAYING) {
+    if(nanachiVoiceState === nanachiVoiceStates.PLAYING && nanachiVoiceState !== nanachiVoiceStates.SWITCHING) {
         message.channel.send("Cannot observe while playing audio.");
         return;
     }
 
-    if(!message.member.voice.channel) {
-        message.channel.send("You aren't in a voice channel. Finding most populated channel...");
-        callerChannel = getLargestChannel(message.guild);
-        
-        if(callerChannel.members.size === 0) {
-            message.channel.send("Nobody is in vc.");
-            return;
+    if(!callerChannel) {
+        if(!message.member.voice.channel && nanachiVoiceState !== nanachiVoiceStates.OBSERVING) {
+            message.channel.send("You aren't in a voice channel. Finding most populated channel...");
+            callerChannel = getLargestChannel(message.guild);
+            
+            if(callerChannel.members.size === 0) {
+                message.channel.send("Nobody is in vc.");
+                return;
+            }
+    
         }
-
+    
+        else if(message.member.voice.channel) {
+            callerChannel = message.member.voice.channel;
+        }
     }
-
-    else {
-        callerChannel = message.member.voice.channel;
-    }
-
+    
     roleToObserve = newRoleToObserve.join(" ");
     nanachiVoiceState = nanachiVoiceStates.OBSERVING;
-    message.channel.send(`Observing ${roleToObserve}`);
+
+    if(notify) {
+        message.channel.send(`Observing ${roleToObserve}`);
+    }
 
     callerChannel.join()
     .then((connection) => {
@@ -272,7 +279,7 @@ function observe(message, newRoleToObserve, client, callerChannel=undefined) {
                 console.log(`${user.username} is speaking`);
                 let member = getGuildMemberFromUser(user, callerChannel.guild);
                 if(user.id === member.id) {
-                    if(Array.from(member.roles.cache.values()).some(role => role.name === roleToObserve)) {
+                    if(Array.from(member.roles.cache.values()).some(role => role.name === roleToObserve) || roleToObserve === "*") {
                         member.voice.kick()
                         .then(() => console.log(`Kicked ${member.displayName}`))
                         .catch(console.error);
@@ -298,8 +305,11 @@ function observe(message, newRoleToObserve, client, callerChannel=undefined) {
 }
 
 function stopObserving(message) {
-    nanachiVoiceState === nanachiVoiceStates.NEUTRAL;
+    nanachiVoiceState === nanachiVoiceStates.SWITCHING;
     message.channel.send("No longer observing.");
+    setTimeout(() => {
+        nanachiVoiceState = nanachiVoiceStates.NEUTRAL;
+    }, 2000);
     return;
 }
 
@@ -310,6 +320,54 @@ function leave(message) {
     });
 
     guildVoiceConnection ? guildVoiceConnection.disconnect() : message.channel.send("Not currently in vc.");
+    nanachiVoiceState = nanachiVoiceStates.NEUTRAL;
+    return;
+}
+
+/**
+ * 
+ * @param {Discord.Message} message 
+ */
+async function joinBomb(message) {
+    let currentDate = new Date();
+    
+    message.delete()
+    .catch(console.error);
+
+    if(currentDate - lastBombCommandDate < 1000*30) {
+        message.channel.send(`Command on cooldown. ${parseFloat((1000*10 - (currentDate - lastBombCommandDate))/1000).toFixed(2)} seconds remaining.`);
+        return;
+    }
+    
+    lastBombCommandDate = currentDate;
+    nanachiVoiceState = nanachiVoiceStates.PLAYING;
+    let callerChannel = message.member.voice.channel;
+    let connection = null;
+    let timer = true;
+
+    if(!callerChannel && nanachiVoiceState !== nanachiVoiceStates.OBSERVING) {
+        message.channel.send("You aren't in a voice channel. Finding most populated channel...");
+        callerChannel = getLargestChannel(message.guild);
+        
+        if(callerChannel.members.size === 0) {
+            message.channel.send("Nobody is in vc.");
+            return;
+        }
+    }
+    
+    setTimeout(() => {
+        timer = false;
+        nanachiVoiceState = nanachiVoiceStates.NEUTRAL;
+    }, 4000);
+
+    setInterval(async () => {
+        if(timer) {
+            callerChannel.join()
+            .then((connection) => connection.disconnect())
+            .catch(console.error);
+        }
+    }, 100);
+
     return;
 }
 /**
@@ -321,7 +379,7 @@ function leave(message) {
 function handleUndefinedUser(message, roleToObserve, callerChannel) {
     console.log(`event received; Voice State: ${nanachiVoiceState}`);
     if(nanachiVoiceState === nanachiVoiceStates.OBSERVING) {
-        setTimeout(() => observe(message, roleToObserve, client, callerChannel), 350);
+        setTimeout(() => observe(message, roleToObserve, client, callerChannel, false), 700);
     }
 }
 
@@ -348,4 +406,4 @@ function getLargestChannel(guild) {
 }
 
 module.exports = {grind, roulette, scramble, setDeathChannel, kill, 
-                  snipe, observe, stopObserving, leave};
+                  snipe, observe, stopObserving, leave, joinBomb};

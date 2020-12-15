@@ -9,5 +9,10 @@
     "pl": "**(Under construction)** Plays a local audio file in whatever voice channel you're connected to. This command also has the options 'a', 'l' and 'r'.",   
     "roulette": "Randomly kills a person in vc.",
     "snipe": "**(Admin only)** Kills across servers. Expects a list of ids.",
-    "observe": "Joins the death channel and observes the given role. Kills anyone with that role if they speak."
+    "observe": "Joins the death channel and observes the given role. Kills anyone with that role if they speak.",
+    "stopobserve": "Makes Nanachi stop observing, if she is observing at all.",
+    "leave": "Makes Nanachi leave VC.",
+    "kenemoko": "Gets an image with Keine and Mokou from Gelbooru. Has optional '-nsfw' and '-y' arguments if you want porn or really gay shit. Happy birthday Dakota.",
+    "wide19": "Wide19. If you know you know.",
+    "timecube": "Sends a random line from the Time Cube site. Use the '-image' option for an image."
 }
